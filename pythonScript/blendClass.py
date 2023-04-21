@@ -178,7 +178,7 @@ if __name__ == "__main__":
     print('File count - NV : ', countNV)
 
     # Define a list of the functions
-    functions = [erosion, dilatation, miror, rotation90, rotation180, rotation270, brightened75, brightened25]
+    functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
 
     # Define the input and output directories
     input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx\DF"
@@ -192,6 +192,7 @@ if __name__ == "__main__":
 
     # Loop over the input images and apply the functions to generate new images
     image_count = 0
+    
     for root, _, files in os.walk(input_dir):
         for file in files:
             if file.endswith('.jpg'):
@@ -220,9 +221,38 @@ if __name__ == "__main__":
                 # Break out of the loop if we have generated enough images
                 if image_count >= num_images:
                     break
-                
-
+  
         # Break out of the loop if we have generated enough images
         if image_count >= num_images:
             break
+        else: 
+            input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2\DF"
+            output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2\DF"
+                    
+            for root, _, files in os.walk(input_dir):
+                for file in files:
+                    if file.endswith('.jpg'):
+                        filepath = os.path.join(root, file)
 
+                        image = cv2.imread(filepath)
+                        filename = os.path.basename(filepath)
+                        cv2.imwrite(os.path.join(output_dir, filename), image)
+                        # Apply each function to the image and save the resulting images
+                                
+                        for func in functions:
+                                    
+                            output_image = func(filepath)
+                                    
+                            output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
+                                    
+                            cv2.imwrite(os.path.join(output_dir, output_filename), output_image)
+
+                            # Increment the image count
+                            image_count += 1
+
+                            # Break out of the loop if we have generated enough images
+                            if image_count >= num_images:
+                                    break    
+                                    
+                if image_count >= num_images:
+                    break                    
