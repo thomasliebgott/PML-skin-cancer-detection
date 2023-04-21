@@ -3,6 +3,7 @@ from PIL import Image, ImageEnhance
 import cv2
 import numpy as np
 from PIL import Image
+import shutil 
 
 def counterFile():
 
@@ -181,8 +182,8 @@ if __name__ == "__main__":
     functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
 
     # Define the input and output directories
-    input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx\DF"
-    output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2\DF"
+    input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx"
+    output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2"
 
     # Define the number of images to generate
     num_images = 3500
@@ -196,20 +197,24 @@ if __name__ == "__main__":
     for root, _, files in os.walk(input_dir):
         for file in files:
             if file.endswith('.jpg'):
-                filepath = os.path.join(root, file)
+                input_filepath = os.path.join(root, file)
+                output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
 
-                image = cv2.imread(filepath)
-                filename = os.path.basename(filepath)
-                cv2.imwrite(os.path.join(output_dir, filename), image)
+                # Create the output directory if it does not exist
+                output_directory = os.path.dirname(output_filepath)
+                if not os.path.exists(output_directory):
+                    os.makedirs(output_directory)
+
+                # Copy the input image to the output directory
+                shutil.copy(input_filepath, output_filepath)
+
                 # Apply each function to the image and save the resulting images
-                
                 for func in functions:
-                    
-                    output_image = func(filepath)
-                    
+                    output_image = func(input_filepath)
                     output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
-                    
-                    cv2.imwrite(os.path.join(output_dir, output_filename), output_image)
+                    output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
+                    output_filepath = os.path.join(output_directory, output_filename)
+                    cv2.imwrite(output_filepath, output_image)
 
                     # Increment the image count
                     image_count += 1
@@ -221,38 +226,46 @@ if __name__ == "__main__":
                 # Break out of the loop if we have generated enough images
                 if image_count >= num_images:
                     break
-  
-        # Break out of the loop if we have generated enough images
-        if image_count >= num_images:
-            break
-        else: 
-            input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2\DF"
-            output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2\DF"
+            # Break out of the loop if we have generated enough images
+
+
+        # if image_count <= num_images:
+        #     input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx"
+        #     output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2"
                     
-            for root, _, files in os.walk(input_dir):
-                for file in files:
-                    if file.endswith('.jpg'):
-                        filepath = os.path.join(root, file)
+        #     for root, _, files in os.walk(input_dir):
+        #         for file in files:
+        #             if file.endswith('.jpg'):
+        #                 input_filepath = os.path.join(root, file)
+        #                 output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
 
-                        image = cv2.imread(filepath)
-                        filename = os.path.basename(filepath)
-                        cv2.imwrite(os.path.join(output_dir, filename), image)
-                        # Apply each function to the image and save the resulting images
-                                
-                        for func in functions:
-                                    
-                            output_image = func(filepath)
-                                    
-                            output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
-                                    
-                            cv2.imwrite(os.path.join(output_dir, output_filename), output_image)
+        #                 # Create the output directory if it does not exist
+        #                 output_directory = os.path.dirname(output_filepath)
+        #                 if not os.path.exists(output_directory):
+        #                     os.makedirs(output_directory)
 
-                            # Increment the image count
-                            image_count += 1
+        #                 # Copy the input image to the output directory
+        #                 shutil.copy(input_filepath, output_filepath)
 
-                            # Break out of the loop if we have generated enough images
-                            if image_count >= num_images:
-                                    break    
-                                    
-                if image_count >= num_images:
-                    break                    
+        #                 # Apply each function to the image and save the resulting images
+        #                 for func in functions:
+        #                     output_image = func(input_filepath)
+        #                     output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
+        #                     output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
+        #                     output_filepath = os.path.join(output_directory, output_filename)
+        #                     cv2.imwrite(output_filepath, output_image)
+
+        #                     # Increment the image count
+        #                     image_count += 1
+
+        #                     # Break out of the loop if we have generated enough images
+        #                     if image_count >= num_images:
+        #                         break
+
+        #                 # Break out of the loop if we have generated enough images
+        #                 if image_count >= num_images:
+        #                     break
+            
+        #         # Break out of the loop if we have generated enough images
+        #         if image_count >= num_images:
+        #             break
