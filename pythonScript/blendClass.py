@@ -1,14 +1,8 @@
 import os
 from PIL import Image, ImageEnhance
-import shutil
 import cv2
 import numpy as np
 from PIL import Image
-import re 
-import glob
-
-
-directory = "D:\Hochschule\SS\PML\Project_PML\dx"
 
 def counterFile():
 
@@ -149,18 +143,29 @@ def rotation270(directory):
     
     return opencv_img
 
-
 def brightened75(directory):
-        # Check if the filename matches the required pattern
-        image = Image.open(directory)
-        brightened_image = ImageEnhance.Brightness(image).enhance(0.75)
-        return brightened_image   
- 
+    # Open the original image
+    img = Image.open(directory)
+
+    # Apply brightness enhancement
+    brightened_img = ImageEnhance.Brightness(img).enhance(0.75)
+
+    # Convert PIL Image to NumPy array and then to OpenCV image
+    opencv_img = cv2.cvtColor(np.array(brightened_img), cv2.COLOR_RGB2BGR)
+
+    return opencv_img
+
 def brightened25(directory):
-        # Check if the filename matches the required pattern
-        image = Image.open(directory)
-        brightened_image = ImageEnhance.Brightness(image).enhance(0.25)
-        return brightened_image      
+    # Open the original image
+    img = Image.open(directory)
+
+    # Apply brightness enhancement
+    brightened_img = ImageEnhance.Brightness(img).enhance(1.25)
+
+    # Convert PIL Image to NumPy array and then to OpenCV image
+    opencv_img = cv2.cvtColor(np.array(brightened_img), cv2.COLOR_RGB2BGR)
+
+    return opencv_img   
                
 if __name__ == "__main__":
     
