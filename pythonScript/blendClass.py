@@ -166,7 +166,7 @@ def brightened25(directory):
     opencv_img = cv2.cvtColor(np.array(brightened_img), cv2.COLOR_RGB2BGR)
 
     return opencv_img   
-               
+
 if __name__ == "__main__":
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile()
@@ -197,11 +197,13 @@ if __name__ == "__main__":
             if file.endswith('.jpg'):
                 filepath = os.path.join(root, file)
 
-                # Load the image
-                #image = cv2.imread(filepath)
-
+                image = cv2.imread(filepath)
+                filename = os.path.basename(filepath)
+                cv2.imwrite(os.path.join(output_dir, filename), image)
                 # Apply each function to the image and save the resulting images
+                
                 for func in functions:
+                    
                     output_image = func(filepath)
                     
                     output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
@@ -218,6 +220,7 @@ if __name__ == "__main__":
                 # Break out of the loop if we have generated enough images
                 if image_count >= num_images:
                     break
+                
 
         # Break out of the loop if we have generated enough images
         if image_count >= num_images:
