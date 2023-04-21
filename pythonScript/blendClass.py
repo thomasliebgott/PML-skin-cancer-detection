@@ -79,18 +79,28 @@ def erosion(directory):
     erosion_shape = cv2.MORPH_ELLIPSE
     
     element = cv2.getStructuringElement(erosion_shape ,(2 * erosion_size +1, 2* erosion_size +1),(erosion_size, erosion_size))
+
+    # load image with the directory
+    img = cv2.imread(directory)
     
-    dist = cv2.erode(directory, element)
-    return dist 
+    # aplly the erosion 
+    dist = cv2.erode(img, element)
+    
+    return dist
 
 def dilatation(directory):
-    dilatation_size = 1 
-    dilatation_shape = cv2.MORPH_ELLIPSE
-
-    element = cv2.getStructuringElement(dilatation_shape,(2 * dilatation_size +1, 2* dilatation_size +1),(dilatation_size, dilatation_size))
+    dilation_size = 1 
+    dilation_shape = cv2.MORPH_ELLIPSE
     
-    dist = cv2.dilate(directory, element)
-    return dist 
+    element = cv2.getStructuringElement(dilation_shape, (2 * dilation_size + 1, 2 * dilation_size + 1), (dilation_size, dilation_size))
+
+    # Charger l'image à partir du chemin de répertoire
+    img = cv2.imread(directory)
+    
+    # Appliquer l'opération de dilatation sur l'image chargée
+    dist = cv2.dilate(img, element)
+    
+    return dist
 
 def rotation90(directory):
     # Open the original image
@@ -106,31 +116,24 @@ def rotation90(directory):
     # Resize the rotated image to the original dimensions
     resized_img = rotated_img.resize((int(height * aspect_ratio), height))
 
-    return resized_img
-
-    # # Extract the image ID from the path using regular expressions
-    # image_id = re.search(r'ISIC_\d+', directory).group()
+    # Convert PIL Image to OpenCV image
+    opencv_img = cv2.cvtColor(np.array(resized_img), cv2.COLOR_RGB2BGR)
     
-    # # Save the resized image in the same file format as the original image
-    # resized_img.save(os.path.join("D:\Hochschule\SS\PML\Project_PML/rotation", image_id+"_rotated_90.jpg"))
+    return opencv_img
 
 def rotation180(directory):
     # Open the original image
-    img = Image.open(directory)
-
-    # Rotate the image 180 degrees clockwise
-    rotated_img = img.rotate(180, expand=True)
+    img = cv2.imread(directory)
+    
+    # Rotate the image 180 degrees
+    rotated_img = cv2.rotate(img, cv2.ROTATE_180)
 
     return rotated_img
-    # # Save the rotated image
-    # # Extract the image ID from the path using regular expressions
-    # image_id = re.search(r'ISIC_\d+', directory).group()
-    # rotated_img.save(os.path.join("D:\Hochschule\SS\PML\Project_PML/rotation", image_id+"_rotated_180.jpg"))
 
 def rotation270(directory):
     # Open the original image
     img = Image.open(directory)
-
+    
     # Rotate the image 270 degrees clockwise
     rotated_img = img.rotate(90, expand=True)
 
@@ -141,11 +144,11 @@ def rotation270(directory):
     # Resize the rotated image to the original dimensions
     resized_img = rotated_img.resize((int(height * aspect_ratio), height))
 
-    # Extract the image ID from the path using regular expressions
-    image_id = re.search(r'ISIC_\d+', directory).group()
+    # Convert PIL Image to OpenCV image
+    opencv_img = cv2.cvtColor(np.array(resized_img), cv2.COLOR_RGB2BGR)
+    
+    return opencv_img
 
-    # Save the resized image in the same file format as the original image
-    resized_img.save(os.path.join("D:\Hochschule\SS\PML\Project_PML/rotation", image_id+"_rotated_270.jpg"))
 
 def brightened75(directory):
         # Check if the filename matches the required pattern
@@ -190,11 +193,11 @@ if __name__ == "__main__":
                 filepath = os.path.join(root, file)
 
                 # Load the image
-                image = cv2.imread(filepath)
+                #image = cv2.imread(filepath)
 
                 # Apply each function to the image and save the resulting images
                 for func in functions:
-                    output_image = func(image)
+                    output_image = func(filepath)
                     
                     output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
                     
