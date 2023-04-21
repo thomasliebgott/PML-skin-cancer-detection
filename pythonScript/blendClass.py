@@ -64,9 +64,9 @@ def counterFile():
     
     return countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC
 
-def miror(image):
+def miror(directory):
     # Load the image
-    img = image
+    img = cv2.imread(directory)
 
     # Flip the image horizontally
     img_flip = cv2.flip(img, 1)
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     print('File count - NV : ', countNV)
 
     # Define a list of the functions
-    functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
+    functions = [erosion, dilatation, miror, rotation90, rotation180, rotation270, brightened75, brightened25]
 
     # Define the input and output directories
     input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx\DF"
