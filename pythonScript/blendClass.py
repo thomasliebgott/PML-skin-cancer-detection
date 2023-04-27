@@ -188,7 +188,7 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
             # Apply each function to the images in the output directory
             image_count = len(os.listdir(output_dir_path))
 
-            while image_count < 3500 and image_count < num_images:
+            while image_count < num_images:
                 for file in os.listdir(output_dir_path):
                     if file.endswith('.jpg'):
                         input_filepath = os.path.join(output_dir_path, file)
@@ -203,15 +203,15 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
                             image_count += 1
 
                             # Break out of the loop if we have generated enough images
-                            if image_count >= 3500 or image_count >= num_images:
+                            if image_count >= num_images:
                                 break
 
                     # Break out of the loop if we have generated enough images
-                    if image_count >= 3500 or image_count >= num_images:
+                    if image_count >= num_images:
                         break
 
                 # Break out of the loop if we have generated enough images
-                if image_count >= 3500 or image_count >= num_images:
+                if image_count >= num_images:
                     break
 
 if __name__ == "__main__":
