@@ -15,44 +15,43 @@ def counterFile(path):
             countAKIEDC += 1
     
     countBCC = 0
-    for path in os.listdir('dx/BCC'):
+    for filename in os.listdir(os.path.join(path,'BCC')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/BCC', path)):
+        if os.path.isfile(os.path.join(path,'BCC', filename)):
             countBCC += 1
-    #print('File count - BCC : ', countBCC)
 
     countBKL = 0
-    for path in os.listdir('dx/BKL'):
+    for filename in os.listdir(os.path.join(path,'BKL')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/BKL', path)):
+        if os.path.isfile(os.path.join(path,'BKL', filename)):
             countBKL += 1
     #print('File count - BKL : ', countBCC)
 
     countDF = 0
-    for path in os.listdir('dx/DF'):
+    for filename in os.listdir(os.path.join(path,'DF')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/DF', path)):
+        if os.path.isfile(os.path.join(path,'DF', filename)):
             countDF += 1
     #print('File count - DF : ', countDF)
 
     countMEL = 0
-    for path in os.listdir('dx/MEL'):
+    for filename in os.listdir(os.path.join(path,'MEL')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/MEL', path)):
+        if os.path.isfile(os.path.join(path,'MEL', filename)):
             countMEL += 1
     #print('File count - MEL : ', countMEL)
 
     countNV = 0
-    for path in os.listdir('dx/NV'):
+    for filename in os.listdir(os.path.join(path,'NV')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/NV', path)):
+        if os.path.isfile(os.path.join(path,'NV', filename)):
             countNV += 1
     #print('File count - NV : ', countNV)
 
     countVASC = 0
-    for path in os.listdir('dx/VASC'):
+    for filename in os.listdir(os.path.join(path,'VASC')):
         # check if current path is a file
-        if os.path.isfile(os.path.join('dx/VASC', path)):
+        if os.path.isfile(os.path.join(path,'VASC', filename)):
             countVASC += 1
     #print('File count - VASC : ', countVASC)
     
@@ -167,43 +166,53 @@ def brightened25(directory):
 
     return opencv_img   
 
-def applyImageProcessing(input_dir,output_dir,num_images,functions):
-    # Loop over the input images and apply the functions to generate new images
-    image_count = 0
+def applyImageProcessing(input_dir, output_dir, num_images, functions):
+    # Loop over the input directories
+    for root, dirs, _ in os.walk(input_dir):
+        # Loop over the directories in the input directory
+        for dir in dirs:
+            input_dir_path = os.path.join(root, dir)
+            output_dir_path = os.path.join(output_dir, dir)
 
-    for root, _, files in os.walk(input_dir):
-        for file in files:
-            if file.endswith('.jpg'):
-                image_count = 0
-                input_filepath = os.path.join(root, file)
-                output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
+            # Create the output directory if it does not exist
+            if not os.path.exists(output_dir_path):
+                os.makedirs(output_dir_path)
 
-                # Create the output directory if it does not exist
-                output_directory = os.path.dirname(output_filepath)
-                if not os.path.exists(output_directory):
-                    os.makedirs(output_directory)
+            # Copy all the images from the input directory to the output directory
+            for file in os.listdir(input_dir_path):
+                if file.endswith('.jpg'):
+                    input_filepath = os.path.join(input_dir_path, file)
+                    output_filepath = os.path.join(output_dir_path, file)
+                    shutil.copy(input_filepath, output_filepath)
 
-                # Copy the input image to the output directory
-                shutil.copy(input_filepath, output_filepath)
+            # Apply each function to the images in the output directory
+            image_count = len(os.listdir(output_dir_path))
 
-                # Apply each function to the image and save the resulting images
-                for func in functions:
-                    output_image = func(input_filepath)
-                    output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
-                    output_filepath = os.path.join(output_dir, os.path.relpath(input_filepath, input_dir))
-                    output_filepath = os.path.join(output_directory, output_filename)
-                    cv2.imwrite(output_filepath, output_image)
+            while image_count < 3500 and image_count < num_images:
+                for file in os.listdir(output_dir_path):
+                    if file.endswith('.jpg'):
+                        input_filepath = os.path.join(output_dir_path, file)
 
-                    # Increment the image count
-                    image_count += 1
+                        for func in functions:
+                            output_image = func(input_filepath)
+                            output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
+                            output_filepath = os.path.join(output_dir_path, output_filename)
+                            cv2.imwrite(output_filepath, output_image)
+
+                            # Increment the image count
+                            image_count += 1
+
+                            # Break out of the loop if we have generated enough images
+                            if image_count >= 3500 or image_count >= num_images:
+                                break
 
                     # Break out of the loop if we have generated enough images
-                    if image_count >= num_images:
+                    if image_count >= 3500 or image_count >= num_images:
                         break
-                    
-                    # Break out of the loop if we have generated enough images
-        if image_count >= num_images:
-            break
+
+                # Break out of the loop if we have generated enough images
+                if image_count >= 3500 or image_count >= num_images:
+                    break
 
 if __name__ == "__main__":
     
@@ -219,6 +228,7 @@ if __name__ == "__main__":
     print('File count - DF : ', countDF)
     print('File count - MEL : ', countMEL)
     print('File count - NV : ', countNV)
+    print('File count - VASC : ', countVASC)
 
     # Define a list of the functions
     functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
@@ -238,6 +248,4 @@ if __name__ == "__main__":
     print('File count - DF : ', countDF)
     print('File count - MEL : ', countMEL)
     print('File count - NV : ', countNV)
-    
-
-
+    print('File count - VASC : ', countVASC)
