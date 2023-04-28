@@ -186,40 +186,58 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
                     shutil.copy(input_filepath, output_filepath)
 
             # Apply each function to the images in the output directory
-            image_count = len(os.listdir(output_dir_path))
+            dir_counter = len(os.listdir(output_dir_path))
 
-            while image_count < num_images:
+            image_factor = (num_images - dir_counter) / dir_counter
+            
+            while dir_counter < num_images:
                 for file in os.listdir(output_dir_path):
                     if file.endswith('.jpg'):
                         input_filepath = os.path.join(output_dir_path, file)
-
-                        for func in functions:
+                        
+                        function_counter = 0 
+                        image_count = 0    
+                                              
+                        while image_count < image_factor :
+                            
+                            if function_counter > len(functions)-1:
+                                function_counter = 0 
+                            
+                            func = functions[function_counter]
                             output_image = func(input_filepath)
-                            output_filename = os.path.splitext(file)[0] + "_" + func.__name__ + os.path.splitext(file)[1]
-                            output_filepath = os.path.join(output_dir_path, output_filename)
+                            output_filename = os.path.splitext(file)[0] +  '_' + str(image_count) + "_" + func.__name__ + os.path.splitext(file)[1]
+                            output_filepath = os.path.join(output_dir_path, output_filename) 
                             cv2.imwrite(output_filepath, output_image)
 
-                            # Increment the image count
+                            function_counter += 1 
+                            
                             image_count += 1
+                             
+                            # Increment the image count
+                            dir_counter += 1
 
                             # Break out of the loop if we have generated enough images
-                            if image_count >= num_images:
+                            if dir_counter >= num_images:
                                 break
 
                     # Break out of the loop if we have generated enough images
-                    if image_count >= num_images:
+                    if dir_counter >= num_images:
                         break
 
                 # Break out of the loop if we have generated enough images
-                if image_count >= num_images:
+                if dir_counter >= num_images:
                     break
 
+def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
+    nn = [countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC]
+    max = np.max(nn)
+    return max 
+        
 if __name__ == "__main__":
     
     # Define the input and output directories
     input_dir = r"D:\Hochschule\SS\PML\Project_PML\dx"
     output_dir = r"D:\Hochschule\SS\PML\Project_PML\dx2"
-    
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
     print('File count - AKIEDC : ', countAKIEDC)
@@ -230,14 +248,16 @@ if __name__ == "__main__":
     print('File count - NV : ', countNV)
     print('File count - VASC : ', countVASC)
 
+     # Define the number of images to generate
+    num_images = getMax(countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC)
+    
+    print("num_image = " + str(num_images))
+    
     # Define a list of the functions
     functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
 
-    # Define the number of images to generate
-    num_images = 3500
-
     # Loop over the input images and apply the functions to generate new images
-    image_count = 0
+    dir_counter = 0
     
     applyImageProcessing(input_dir,output_dir,num_images,functions)
     
@@ -249,3 +269,7 @@ if __name__ == "__main__":
     print('File count - MEL : ', countMEL)
     print('File count - NV : ', countNV)
     print('File count - VASC : ', countVASC)
+    
+    
+    
+    
