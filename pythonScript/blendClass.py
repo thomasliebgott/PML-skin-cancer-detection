@@ -167,12 +167,12 @@ def brightened25(directory):
     return opencv_img   
 
 def applyImageProcessing(input_dir, output_dir, num_images, functions):
-    # Loop over the input directories
-    for root, dirs, _ in os.walk(input_dir):
-        # Loop over the directories in the input directory
-        for dir in dirs:
-            input_dir_path = os.path.join(root, dir)
-            output_dir_path = os.path.join(output_dir, dir)
+    # Loop in the input directories
+    for originalRoot, directorys, _ in os.walk(input_dir):
+        # Loop in the directories in the input directory
+        for directory in directorys:
+            input_dir_path = os.path.join(originalRoot, directory)
+            output_dir_path = os.path.join(output_dir, directory)
 
             # Create the output directory if it does not exist
             if not os.path.exists(output_dir_path):
@@ -185,46 +185,48 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
                     output_filepath = os.path.join(output_dir_path, file)
                     shutil.copy(input_filepath, output_filepath)
 
-            # Apply each function to the images in the output directory
+            # Increment the number of images in the directory count (setup with original number in dx)
             dir_counter = len(os.listdir(output_dir_path))
 
-            image_factor = (num_images - dir_counter) / dir_counter
+            #calculate the number of images that we want per directory
+            image_factor = ((num_images - dir_counter) / dir_counter)
             
             while dir_counter < num_images:
                 for file in os.listdir(output_dir_path):
                     if file.endswith('.jpg'):
-                        input_filepath = os.path.join(output_dir_path, file)
+                        input_filepath = os.path.join(output_dir_path, file) #copy all the images from original dir dx to our new dx2
                         
+                        # Increment the number of time we apply function in an image
                         function_counter = 0 
+                        # Increment the number of images in the directory count
                         image_count = 0    
                                               
                         while image_count < image_factor :
                             
-                            if function_counter > len(functions)-1:
+                            if function_counter > len(functions)-1: #verifiy number of images to spread the number of operations and have the same number for each image 
                                 function_counter = 0 
                             
-                            func = functions[function_counter]
+                            func = functions[function_counter] #apply the function to the images
                             output_image = func(input_filepath)
-                            output_filename = os.path.splitext(file)[0] +  '_' + str(image_count) + "_" + func.__name__ + os.path.splitext(file)[1]
-                            output_filepath = os.path.join(output_dir_path, output_filename) 
-                            cv2.imwrite(output_filepath, output_image)
+                            output_filename = os.path.splitext(file)[0] +  '_' + str(image_count) + "_" + func.__name__ + os.path.splitext(file)[1] #set the image name with the function name  
+                            output_filepath = os.path.join(output_dir_path, output_filename) #set the output file to dir in dx2 the new dir with image modifications
+                            cv2.imwrite(output_filepath, output_image) #save the new image 
 
                             function_counter += 1 
                             
                             image_count += 1
                              
-                            # Increment the image count
                             dir_counter += 1
 
-                            # Break out of the loop if we have generated enough images
+                            # Break the loop if we have generated enough images
                             if dir_counter >= num_images:
                                 break
 
-                    # Break out of the loop if we have generated enough images
+                    # Break the loop if we have generated enough images
                     if dir_counter >= num_images:
                         break
 
-                # Break out of the loop if we have generated enough images
+                # Break the loop if we have generated enough images
                 if dir_counter >= num_images:
                     break
 
@@ -232,7 +234,7 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
     nn = [countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC]
     max = np.max(nn)
     return max 
-        
+
 if __name__ == "__main__":
     
     # Define the input and output directories
@@ -248,7 +250,7 @@ if __name__ == "__main__":
     print('File count - NV : ', countNV)
     print('File count - VASC : ', countVASC)
 
-     # Define the number of images to generate
+    # Define the number of images to generate
     num_images = getMax(countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC)
     
     print("num_image = " + str(num_images))

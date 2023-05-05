@@ -1,26 +1,32 @@
-import cv2 
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 
-def erosion(directory):
-    erosion_size = 1 
-    erosion_shape = cv2.MORPH_ELLIPSE
-    
-    element = cv2.getStructuringElement(erosion_shape ,(2 * erosion_size +1, 2* erosion_size +1),(erosion_size, erosion_size))
-    
-    dist = cv2.erode(directory, element)
-    return dist 
+def main():
+    img = cv2.imread('D:\Hochschule\SS\PML\Project_PML\dx\BCC\ISIC_0026343.jpg')
+    assert img is not None, "file could not be read, check with os.path.exists()"
 
-def dilatation(directory):
-    dilatation_size = 1 
-    dilatation_shape = cv2.MORPH_ELLIPSE
-
-    element = cv2.getStructuringElement(dilatation_shape,(2 * dilatation_size +1, 2* dilatation_size +1),(dilatation_size, dilatation_size))
+    edges = cv2.Canny(img,100,200)
     
-    dist = cv2.dilate(directory, element)
-    return dist 
+    # Créer un masque de contour en inversant les contours détectés
+    mask = 255 - edges  
+    
+    # Appliquer le masque de contour à l'image d'origine pour supprimer les contours
+    result = cv2.bitwise_and(img, img, mask=mask)
+    
+    plt.plot(1),plt.imshow(img[...,::-1])
+    plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+    plt.show()
+    
+    plt.plot(2),plt.imshow(edges,cmap = 'gray')
+    plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+    plt.show()
+    
+    plt.plot(3),plt.imshow(result[...,::-1])
+    plt.title('Result Image'), plt.xticks([]), plt.yticks([])
+    plt.show()
+    
+    return 0
 
 if __name__ == "__main__":
-    directory = cv2.imread("D:\Hochschule\SS\PML\Project_PML\dx\BKL\ISIC_0024409.jpg")
-    dist = dilatation(directory)
-    cv2.imwrite("dilated_image.jpg", dist)
-    dist = erosion(directory)
-    cv2.imwrite("eroded_image.jpg", dist)
+    main()
