@@ -234,7 +234,7 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
     nn = [countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC]
     max = np.max(nn)
     return max 
-
+    
 if __name__ == "__main__":
     
     # Define the input and output directories
