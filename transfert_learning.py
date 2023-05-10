@@ -48,6 +48,8 @@ import time
 import os
 import copy
 
+from tqdm import tqdm
+
 cudnn.benchmark = True
 plt.ion()   # interactive mode
 
@@ -113,7 +115,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     best_model_wts = copy.deepcopy(model.state_dict()) #copy le model 
     best_acc = 0.0
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs), desc='Epochs'):
         print(f'Epoch {epoch}/{num_epochs - 1}')
         print('-' * 10)
 
@@ -121,14 +123,16 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
+                print('Training...')
             else:
                 model.eval()   # Set model to evaluate mode
+                print('Validating...')
 
             running_loss = 0.0
             running_corrects = 0
 
             # Iterate over data.
-            for inputs, labels in dataloaders[phase]:
+            for inputs, labels in tqdm(dataloaders[phase], desc=f'{phase.capitalize()} iteration', leave=False):
                 inputs = inputs.to(device) #device est gpu 
                 labels = labels.to(device)
 
@@ -150,6 +154,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
+
+
             if phase == 'train':
                 scheduler.step()
 
@@ -219,20 +225,20 @@ if __name__ == '__main__':
 
     data_transforms = {
     'train': transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        transforms.RandomResizedCrop(450, scale=(0.8, 1.0)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(), #conv en tensort pour le modele 
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize((450, 600)),
+        transforms.CenterCrop(450),
         transforms.ToTensor(), 
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     }
 
-    data_dir = 'Transfert_learning_tuto/hymenoptera_data'
+    data_dir = 'D:\PML\PML\dx3'
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
@@ -244,6 +250,7 @@ if __name__ == '__main__':
     class_names = image_datasets['train'].classes
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
+    print(device)
 
     # Get a batch of training data
     inputs, classes = next(iter(dataloaders['train']))
@@ -258,7 +265,7 @@ if __name__ == '__main__':
 
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    model_ft.fc = nn.Linear(num_ftrs, 2) #type de übetragungfuncktion 
+    model_ft.fc = nn.Linear(num_ftrs, 8) #type de übetragungfuncktion #######################anderung 
 
     model_ft = model_ft.to(device)
 
@@ -281,10 +288,18 @@ if __name__ == '__main__':
     #
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=25)
+                        num_epochs=4)
 
     ######################################################################
     #
+
+    # Save model
+    model_folder = 'D:\PML\PML\model'
+    model_number = len(os.listdir(model_folder)) + 1
+    model_path = os.path.join(model_folder, f'model_{model_number}')
+    os.makedirs(model_path)
+    model_file = os.path.join(model_path, 'model.pth')
+    torch.save(model_ft.state_dict(), model_file)
 
     visualize_model(model_ft)
 
