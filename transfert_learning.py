@@ -238,7 +238,7 @@ if __name__ == '__main__':
     ]),
     }
 
-    data_dir = 'D:\PML\PML\dx3'
+    data_dir = 'D:\Hochschule\SS\PML\Project_PML\dx3'
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
@@ -294,7 +294,7 @@ if __name__ == '__main__':
     #
 
     # Save model
-    model_folder = 'D:\PML\PML\model'
+    model_folder = 'D:\Hochschule\SS\PML\Project_PML\model'
     model_number = len(os.listdir(model_folder)) + 1
     model_path = os.path.join(model_folder, f'model_{model_number}')
     os.makedirs(model_path)
