@@ -4,19 +4,15 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import torch.backends.cudnn as cudnn
 import numpy as np
-import torchvision
 from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
-import time
 import os
-import copy
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 
 os.environ['PYDEVD_DISABLE_FILE_VALIDATION'] = '1'
 
-from sklearn.metrics import confusion_matrix
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
     
 model_ft = models.resnet18(pretrained=True) #nehmt das model
@@ -26,7 +22,7 @@ num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
 model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
-model_ft.load_state_dict(torch.load('D:\Hochschule\SS\PML\Project_PML\model\model_3\model.pth'))
+model_ft.load_state_dict(torch.load('D:\Hochschule\SS\PML\Project_PML\output\model\model_3\model.pth'))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
@@ -63,7 +59,6 @@ dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                             shuffle=True, num_workers=4)
             for x in ['test']}
 
-
 true_labels = []
 predicted_labels = []
 
@@ -93,5 +88,12 @@ if __name__ == '__main__':
                          columns=[i for i in classes])
     plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
-    plt.savefig('D:\Hochschule\SS\PML\Project_PML\model\cm\output.png')
+
+    cm_folder = 'D:\Hochschule\SS\PML\Project_PML\output\cm'
+    model_folder = 'D:\Hochschule\SS\PML\Project_PML\output\model'
+    cm_number = len(os.listdir(model_folder)) + 1
+    cm_path = os.path.join(cm_folder, f'model_{cm_number}')
+    os.makedirs(cm_path)
+    plt.savefig(cm_path + '/output.png')
+    
 

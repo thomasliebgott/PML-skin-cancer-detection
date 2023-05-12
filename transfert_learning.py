@@ -294,7 +294,7 @@ if __name__ == '__main__':
     #
 
     # Save model
-    model_folder = 'D:\Hochschule\SS\PML\Project_PML\model'
+    model_folder = 'D:\Hochschule\SS\PML\Project_PML\output\model'
     model_number = len(os.listdir(model_folder)) + 1
     model_path = os.path.join(model_folder, f'model_{model_number}')
     os.makedirs(model_path)
