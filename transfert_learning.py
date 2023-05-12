@@ -265,7 +265,7 @@ if __name__ == '__main__':
 
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    model_ft.fc = nn.Linear(num_ftrs, 8) #type de übetragungfuncktion #######################anderung 
+    model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
     model_ft = model_ft.to(device)
 
@@ -288,7 +288,7 @@ if __name__ == '__main__':
     #
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=4)
+                        num_epochs=1)
 
     ######################################################################
     #
