@@ -238,8 +238,8 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
 if __name__ == "__main__":
     
     # Define the input and output directories
-    input_dir = r"D:\PML\PML\dx"
-    output_dir = r"D:\PML\PML\dx2"
+    input_dir = r"Project_PML\dx"
+    output_dir = r"Project_PML\dx2"
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
     print('File count - AKIEDC : ', countAKIEDC)

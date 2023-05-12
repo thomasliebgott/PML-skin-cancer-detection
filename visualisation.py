@@ -11,10 +11,8 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 
-os.environ['PYDEVD_DISABLE_FILE_VALIDATION'] = '1'
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
-    
+
 model_ft = models.resnet18(pretrained=True) #nehmt das model
 num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
@@ -22,11 +20,9 @@ num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
 model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
-model_ft.load_state_dict(torch.load('D:\Hochschule\SS\PML\Project_PML\output\model\model_3\model.pth'))
+model_ft.load_state_dict(torch.load(r'Project_PML\output\models\model_1\model.pth'))
 model_ft = model_ft.to(device)
 model_ft.eval()
-
-was_training = model_ft.training
 
 data_transforms = {
 'train': transforms.Compose([
@@ -49,7 +45,7 @@ data_transforms = {
 ]),
 }
 
-data_dir = 'D:\Hochschule\SS\PML\Project_PML\dx3'
+data_dir = r'Project_PML\dx3'
 
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                         data_transforms[x])
@@ -89,11 +85,13 @@ if __name__ == '__main__':
     plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
 
-    cm_folder = 'D:\Hochschule\SS\PML\Project_PML\output\cm'
-    model_folder = 'D:\Hochschule\SS\PML\Project_PML\output\model'
-    cm_number = len(os.listdir(model_folder)) + 1
-    cm_path = os.path.join(cm_folder, f'model_{cm_number}')
-    os.makedirs(cm_path)
-    plt.savefig(cm_path + '/output.png')
+    cm_folder = r'Project_PML\output\conf_matrix'
+    visualisation_name = 'test'
+
+    cm_path = os.path.join(cm_folder, f'model_{visualisation_name}')
+
+    os.makedirs(cm_path, exist_ok=True)
+
+    plt.savefig(os.path.join(cm_path, 'output.png'))
     
 
