@@ -238,7 +238,7 @@ if __name__ == '__main__':
     ]),
     }
 
-    data_dir = 'D:\Hochschule\SS\PML\Project_PML\dx3'
+    data_dir = 'D:\\pml\\branch_Ali\\PML-master\\PML-master\\inputData3'
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
@@ -265,7 +265,7 @@ if __name__ == '__main__':
 
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    model_ft.fc = nn.Linear(num_ftrs, 8) #type de übetragungfuncktion #######################anderung 
+    model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
     model_ft = model_ft.to(device)
 
@@ -288,13 +288,13 @@ if __name__ == '__main__':
     #
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=4)
+                        num_epochs=1)
 
     ######################################################################
     #
 
     # Save model
-    model_folder = 'D:\Hochschule\SS\PML\Project_PML\model'
+    model_folder = 'model'
     model_number = len(os.listdir(model_folder)) + 1
     model_path = os.path.join(model_folder, f'model_{model_number}')
     os.makedirs(model_path)

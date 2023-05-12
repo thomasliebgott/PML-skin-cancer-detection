@@ -166,6 +166,54 @@ def brightened25(directory):
 
     return opencv_img   
 
+def RemoveHair(directory):
+    img = cv2.imread(directory, 0) #read image as grayscale
+    countourimage= img
+    l= 255
+    u= 56
+
+    cv2.namedWindow('image') # make a window with name 'image'
+    canny = cv2.Canny(img, l, u)
+    cv2.imshow('canny', canny)
+    contours, hierarchy = cv2.findContours(canny, 
+    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    h, w= img.shape
+    countourimage= np.zeros((h, w), dtype = np.uint8)
+    averag=0
+    if len(contours) > 0:
+        for cont in contours:
+            averag+= len(cont)
+        averag= averag/ len(contours)
+        counter=0
+        for cont in contours:
+            sizeHair=len(cont)   
+            area= cv2.contourArea(cont)
+            rect = cv2.boundingRect(cont)
+            rectangleArea= rect[2]*rect[3]
+            ratioArea= area/rectangleArea
+            ratioRectSide= 0
+            if rect[2]> rect[3]:
+                ratioRectSide= rect[3]/ rect[2]
+            else:
+                ratioRectSide= rect[2]/ rect[3]
+
+            if ratioArea < 0.01 and area > 25:
+                cv2.drawContours(countourimage, contours, counter, (255,255,255), 6)
+                numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+                print(area)
+                print(rectangleArea)
+                print(ratioRectSide)
+                print(ratioArea)
+                #cv2.imshow('image', numpy_horizontal_concat)
+                #cv2.waitKey(1)
+            counter+=1
+
+    numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+    cv2.imshow('image', numpy_horizontal_concat)
+    cv2.waitKey(1)
+
+    return countourimage
+
 def applyImageProcessing(input_dir, output_dir, num_images, functions):
     # Loop in the input directories
     for originalRoot, directorys, _ in os.walk(input_dir):
@@ -234,12 +282,12 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
     nn = [countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC]
     max = np.max(nn)
     return max 
-    
+
 if __name__ == "__main__":
     
     # Define the input and output directories
-    input_dir = r"D:\PML\PML\dx"
-    output_dir = r"D:\PML\PML\dx2"
+    input_dir = r"D:\pml\PML-master\PML-master\inputData"
+    output_dir = r"D:\pml\PML-master\PML-master\inputData2"
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
     print('File count - AKIEDC : ', countAKIEDC)
@@ -256,7 +304,7 @@ if __name__ == "__main__":
     print("num_image = " + str(num_images))
     
     # Define a list of the functions
-    functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
+    functions = [miror, rotation90, rotation180, rotation270, brightened75, brightened25]
 
     # Loop over the input images and apply the functions to generate new images
     dir_counter = 0
