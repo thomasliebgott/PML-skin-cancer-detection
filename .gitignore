@@ -1,5 +1,4 @@
 # Ignore les fichiers JPG et PNG
 *.jpg
 *.jpeg
-*.png
 *.zip
