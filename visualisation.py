@@ -59,20 +59,24 @@ true_labels = []
 predicted_labels = []
 
 def save_confusion_matrix(visualisation_name):
+    
     cm_folder = r'output\conf_matrix'
-    folder_exists = True
-    folder_index = 0
-    while folder_exists:
-        folder_name = f'model_{visualisation_name}'
-        if folder_index > 0:
-            folder_name += f'_{folder_index}'
-        cm_path = os.path.join(cm_folder, folder_name)
+    
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{visualisation_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
         if not os.path.exists(cm_path):
             os.makedirs(cm_path, exist_ok=True)
-            folder_exists = False
+            folder_is_exists = False
         else:
-            folder_index += 1
-    
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
     plt.savefig(os.path.join(cm_path, 'output.png'))
 
 if __name__ == '__main__':
