@@ -20,7 +20,7 @@ num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
 model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
-model_ft.load_state_dict(torch.load(r'Project_PML\output\models\model_1\model.pth'))
+model_ft.load_state_dict(torch.load(r'output\model\model_3\model.pth'))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
@@ -45,7 +45,7 @@ data_transforms = {
 ]),
 }
 
-data_dir = r'Project_PML\dx3'
+data_dir = r'dx3'
 
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                         data_transforms[x])
@@ -57,6 +57,23 @@ dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
 
 true_labels = []
 predicted_labels = []
+
+def save_confusion_matrix(visualisation_name):
+    cm_folder = r'output\conf_matrix'
+    folder_exists = True
+    folder_index = 0
+    while folder_exists:
+        folder_name = f'model_{visualisation_name}'
+        if folder_index > 0:
+            folder_name += f'_{folder_index}'
+        cm_path = os.path.join(cm_folder, folder_name)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_exists = False
+        else:
+            folder_index += 1
+    
+    plt.savefig(os.path.join(cm_path, 'output.png'))
 
 if __name__ == '__main__':
     model_ft.eval()  
@@ -85,13 +102,8 @@ if __name__ == '__main__':
     plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
 
-    cm_folder = r'Project_PML\output\conf_matrix'
-    visualisation_name = 'test'
-
-    cm_path = os.path.join(cm_folder, f'model_{visualisation_name}')
-
-    os.makedirs(cm_path, exist_ok=True)
-
-    plt.savefig(os.path.join(cm_path, 'output.png'))
+    name_training = 'test'
+    
+    save_confusion_matrix(name_training)
     
 
