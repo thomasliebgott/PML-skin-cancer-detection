@@ -167,52 +167,76 @@ def brightened25(directory):
     return opencv_img   
 
 def RemoveHair(directory):
-    img = cv2.imread(directory, 0) #read image as grayscale
-    countourimage= img
+    orginalImage = cv2.imread(directory, 0) #read image as grayscale
+    img= orginalImage.copy()
     l= 255
     u= 56
 
     cv2.namedWindow('image') # make a window with name 'image'
     canny = cv2.Canny(img, l, u)
-    cv2.imshow('canny', canny)
+    #cv2.imshow('canny', canny)
     contours, hierarchy = cv2.findContours(canny, 
     cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     h, w= img.shape
     countourimage= np.zeros((h, w), dtype = np.uint8)
-    averag=0
     if len(contours) > 0:
-        for cont in contours:
-            averag+= len(cont)
-        averag= averag/ len(contours)
         counter=0
-        for cont in contours:
-            sizeHair=len(cont)   
-            area= cv2.contourArea(cont)
-            rect = cv2.boundingRect(cont)
-            rectangleArea= rect[2]*rect[3]
-            ratioArea= area/rectangleArea
-            ratioRectSide= 0
-            if rect[2]> rect[3]:
-                ratioRectSide= rect[3]/ rect[2]
-            else:
-                ratioRectSide= rect[2]/ rect[3]
 
-            if ratioArea < 0.01 and area > 25:
-                cv2.drawContours(countourimage, contours, counter, (255,255,255), 6)
-                numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
-                print(area)
-                print(rectangleArea)
-                print(ratioRectSide)
-                print(ratioArea)
-                #cv2.imshow('image', numpy_horizontal_concat)
-                #cv2.waitKey(1)
+        for cont in contours:
+            rect = cv2.minAreaRect(cont)
+            rectangleArea= rect[1][0]*rect[1][1]
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            
+            numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+
+            area= cv2.contourArea(cont)
+            rect1 = cv2.boundingRect(cont)
+            if rectangleArea==0 or (rect[1][0]==0 and rect[1][1]==0):
+                counter+=1
+                continue
+            ratioRectSide= 0
+
+            bigSide= 0
+            if rect[1][0] > rect[1][1]:
+                ratioRectSide= rect[1][1]/ rect[1][0]
+                bigSide= rect[1][0]
+            else:
+                ratioRectSide= rect[1][0]/ rect[1][1]
+                bigSide= rect[1][1]
+
+            if  ratioRectSide < 0.3 and bigSide > 33:
+                img = cv2.drawContours(img,[box],0,(255,255,255),3)
+                cv2.drawContours(countourimage, contours, counter, (255,255,255), 9)
+                cv2.waitKey(1)
             counter+=1
 
-    numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+    noHair= filterHair(orginalImage, countourimage)
+    noHair= cv2.cvtColor(noHair,cv2.COLOR_GRAY2RGB)
+    img= cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    numpy_horizontal_concat = np.concatenate((img, noHair), axis=1) # to display image side by side
     cv2.imshow('image', numpy_horizontal_concat)
     cv2.waitKey(1)
+    return noHair
 
-    return countourimage
+def filterHair(orginal, hairMask):
+    w, h = orginal.shape[:2]
+    noHair=orginal.copy()
+    filterSize=9
+
+    for i in range(0, w):
+        for j in range(0, h):
+            pixel=0
+            if (hairMask[i, j] == 255):
+                for k in range(i-int(filterSize/2), i+int(filterSize/2)):
+                    for l in range(j-int(filterSize/2), j+ int(filterSize/2)):
+                        if ( k >= 0 and l >= 0 and k < w and l < h and orginal[k, l] < 180):
+                             pixel=max(pixel, orginal[k, l])
+
+            if (pixel!= 0 and pixel!=255):
+                noHair[i, j]=pixel
+            
+    return noHair
 
 def applyImageProcessing(input_dir, output_dir, num_images, functions):
     # Loop in the input directories
