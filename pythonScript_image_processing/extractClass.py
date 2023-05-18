@@ -1,7 +1,7 @@
 import os
 import shutil
 
-folder_path = "./dx"
+folder_path = r"dx"
 
 if not os.path.exists(folder_path):
     # check if the file exist if it's not it create it 

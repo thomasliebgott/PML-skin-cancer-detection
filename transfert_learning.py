@@ -97,7 +97,7 @@ def imshow(inp, title=None):
 # ``torch.optim.lr_scheduler``.
 
 
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, criterion, optimizer, scheduler, num_epochs):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict()) #copy le model 
@@ -108,7 +108,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     train_accs = []
     val_losses = []
     val_accs = []
-    error_values = []
+    #error_values = []
 
     for epoch in tqdm(range(num_epochs), desc='Epochs'):
         print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -160,7 +160,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             else:
                 val_losses.append(loss.item())
                 val_accs.append(epoch_acc.item())
-                error_values.append(1 - loss.item())  # Calculating the error value
+                #error_values.append(1 - loss.item())  
 
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
@@ -178,7 +178,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model,train_losses,train_accs,val_losses,val_accs,error_values
+    return model,train_losses,train_accs,val_losses,val_accs
 
 ######################################################################
 # Visualizing the model predictions
@@ -217,7 +217,7 @@ def visualize_model(model, num_images=6):
 #
 
 def save_model(model_ft,train_name):
-    model_folder = r'output\model'
+    model_folder = r'Project_PML\output\model'
     
     # Verify if the model folder already exist or not 
     folder_is_exists = True
@@ -236,6 +236,7 @@ def save_model(model_ft,train_name):
     
     #save the model in the correct file 
     model_file_name = os.path.join(model_path, 'model.pth')
+    print("model save")
     torch.save(model_ft.state_dict(), model_file_name)
 
 ######################################################################
@@ -289,7 +290,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
 
     sn.heatmap(df_cm, annot=True)
 
-    cm_folder = r'output\conf_matrix'
+    cm_folder = r'Project_PML\output\conf_matrix'
 
     # Verify if the confusionmaxtrix folder already exist or not 
     folder_is_exists = True
@@ -307,6 +308,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
             index_folder += 1 
     #save the output 
     plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
     plt.show()
 
 
@@ -315,8 +317,8 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
 # ^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name,error_values):
-    output_folder = r'output\accuracy_curve'
+def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name):
+    output_folder = r'Project_PML\output\accuracy_curve'
     os.makedirs(output_folder, exist_ok=True)
 
     # create file based on 'accuracy_curve_name'
@@ -332,7 +334,7 @@ def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_na
     plt.plot(epochs,train_accs, label='Train Accuracy')
     plt.plot(epochs,val_losses, label='Validation Loss')
     plt.plot(epochs,val_accs, label='Validation Accuracy')
-    plt.plot(epochs, error_values, label='Error Value')
+    #plt.plot(epochs, error_values, label='Error Value')
     plt.xlabel('Epoch')
     plt.ylabel('Value')
     plt.title('Accuracy Curve')
@@ -380,7 +382,7 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'dx3'
+    data_dir = r'Project_PML\dx3'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
@@ -425,9 +427,9 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet18_10epochs_dx3'
+    train_name = 'resnet18_10epochs_dx4'
     
-    model_ft,train_losses,train_accs,val_losses,val_accs,error_values = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
+    model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                         num_epochs=10)
 
     ######################################################################
@@ -453,7 +455,7 @@ if __name__ == '__main__':
     
     accuracy_curve_name = train_name
     
-    accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name,error_values)
+    accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name)
 
     ######################################################################
     # visualize_model 
@@ -463,9 +465,6 @@ if __name__ == '__main__':
     visualize_model(model_ft)
     plt.ioff()
     plt.show()
-
-
-
 
 
     ######################################################################
