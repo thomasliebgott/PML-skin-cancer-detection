@@ -217,7 +217,7 @@ def visualize_model(model, num_images=6):
 #
 
 def save_model(model_ft,train_name):
-    model_folder = r'Project_PML\output\model'
+    model_folder = r'output\model'
     
     # Verify if the model folder already exist or not 
     folder_is_exists = True
@@ -290,7 +290,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
 
     sn.heatmap(df_cm, annot=True)
 
-    cm_folder = r'Project_PML\output\conf_matrix'
+    cm_folder = r'output\conf_matrix'
 
     # Verify if the confusionmaxtrix folder already exist or not 
     folder_is_exists = True
@@ -318,7 +318,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
 #
 
 def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name):
-    output_folder = r'Project_PML\output\accuracy_curve'
+    output_folder = r'output\accuracy_curve'
     os.makedirs(output_folder, exist_ok=True)
 
     # create file based on 'accuracy_curve_name'
@@ -382,7 +382,7 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'Project_PML\dx3'
+    data_dir = r'dx4'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
@@ -427,10 +427,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet18_10epochs_dx4'
+    train_name = 'resnet18_1epochs_testpath'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=10)
+                        num_epochs=1)
 
     ######################################################################
     # Save model

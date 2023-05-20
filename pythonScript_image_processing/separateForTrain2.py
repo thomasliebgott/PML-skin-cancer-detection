@@ -2,8 +2,8 @@ import os
 import random
 import shutil
 
-input_dir = r"Project_PML\dx2"
-output_dir = r"Project_PML\dx3"
+input_dir = r"dx2"
+output_dir = r"dx4"
 
 train_percentage = 80
 val_percentage = 20

@@ -106,7 +106,7 @@ if __name__ == '__main__':
     plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
 
-    name_training = 'test'
+    name_training = 'testlabel_and_true'
     
     save_confusion_matrix(name_training)
     
