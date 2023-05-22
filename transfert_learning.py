@@ -318,7 +318,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
 #
 
 def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name):
-    output_folder = r'output\accuracy_curve'
+    output_folder = r'Project_PML\output\accuracy_curve'
     os.makedirs(output_folder, exist_ok=True)
 
     # create file based on 'accuracy_curve_name'
@@ -405,7 +405,7 @@ if __name__ == '__main__':
 
     imshow(out, title=[class_names[x] for x in classes])
 
-    model_ft = models.resnet18(pretrained=True) #nehmt das model
+    model_ft = models.resnet34(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
     # Here the size of each output sample is set to 2.
@@ -427,10 +427,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet18_1epochs_testpath'
+    train_name = 'resnet34_25epochs_dx4'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=1)
+                        num_epochs=25)
 
     ######################################################################
     # Save model
