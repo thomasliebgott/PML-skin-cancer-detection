@@ -174,6 +174,7 @@ def RemoveHair(directory):
     segmentationImageName = os.path.splitext(file_name)
     segmentationImagePath=  segmentationPath + segmentationImageName [0]+ '_segmentation.png'
     sementatedImage = cv2.imread(segmentationImagePath, 0) #read image as grayscale
+
     orginalImage = cv2.imread(directory, 0) #read image as grayscale
     img= orginalImage.copy()
     l= 255
@@ -186,6 +187,9 @@ def RemoveHair(directory):
     cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     h, w= img.shape
     countourimage= np.zeros((h, w), dtype = np.uint8)
+
+    if sementatedImage is None:
+        sementatedImage=np.zeros((h, w), dtype = np.uint8)
     if len(contours) > 0:
         counter=0
 
@@ -220,10 +224,10 @@ def RemoveHair(directory):
 
     noHair= filterHair(orginalImage, countourimage, sementatedImage)
     noHair= cv2.cvtColor(noHair,cv2.COLOR_GRAY2RGB)
-    img= cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
-    numpy_horizontal_concat = np.concatenate((img, noHair), axis=1) # to display image side by side
-    cv2.imshow('image', numpy_horizontal_concat)
-    cv2.waitKey(1)
+    #img= cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    #numpy_horizontal_concat = np.concatenate((img, noHair), axis=1) # to display image side by side
+    #cv2.imshow('image', numpy_horizontal_concat)
+    #cv2.waitKey(1)
     return noHair
 
 def filterHair(orginal, hairMask, sementatedImage):
@@ -318,7 +322,7 @@ if __name__ == "__main__":
     
     # Define the input and output directories
     input_dir = r"D:/pml/ali_branch/PML/dx"
-    output_dir = r"D:/pml/ali_branch/PML/dx666"
+    output_dir = r"D:/pml/ali_branch/PML/MitSegmentierungMaske"
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
     print('File count - AKIEDC : ', countAKIEDC)
