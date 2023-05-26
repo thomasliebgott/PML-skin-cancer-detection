@@ -180,6 +180,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
     model.load_state_dict(best_model_wts)
     return model,train_losses,train_accs,val_losses,val_accs
 
+
 ######################################################################
 # Visualizing the model predictions
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -244,8 +245,154 @@ def save_model(model_ft,train_name):
 # ^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-def confusion_matrix_generate(model_ft,data_dir,cf_name):
+def confusion_matrix_generate_val(model,data_dir,cf_name):
     # load images 
+    print("Generation val CM")
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                        data_transforms[x])
+                for x in ['val']}
+    # create image in a loaders 
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                                shuffle=True, num_workers=4)
+                for x in ['val']}
+    
+    true_labels = []
+    predicted_labels = []
+    model.eval()
+
+    for inputs, labels in dataloaders['val']:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        predicted_labels.extend(preds)
+
+        labels = labels.data.cpu().numpy()
+        true_labels.extend(labels)
+
+    classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
+    
+    predicted_labels = torch.tensor(predicted_labels)
+    true_labels = torch.tensor(true_labels)
+
+    predicted_labels = predicted_labels.cpu().numpy()
+    true_labels = true_labels.cpu().numpy()
+
+    cf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=classes, columns=classes)
+
+    plt.figure(figsize=(12, 7))
+    sn.heatmap(df_cm, annot=True)
+
+    #figure size 
+    plt.figure(figsize=(12, 7))
+
+    sn.heatmap(df_cm, annot=True)
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("val Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    
+    cm_folder = r'output\conf_matrix_val'
+
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{cf_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
+    plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
+    plt.title("val Confusion Matrix")
+    plt.show()
+
+
+def confusion_matrix_generate_train(model,data_dir,cf_name):
+    # load images 
+    print("Generation train CM")
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                        data_transforms[x])
+                for x in ['train']}
+    # create image in a loaders 
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                                shuffle=True, num_workers=4)
+                for x in ['train']}
+    
+    true_labels = []
+    predicted_labels = []
+    model.eval()
+
+    for inputs, labels in dataloaders['train']:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        predicted_labels.extend(preds)
+
+        labels = labels.data.cpu().numpy()
+        true_labels.extend(labels)
+
+    classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
+    
+    predicted_labels = torch.tensor(predicted_labels)
+    true_labels = torch.tensor(true_labels)
+
+    predicted_labels = predicted_labels.cpu().numpy()
+    true_labels = true_labels.cpu().numpy()
+
+    cf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=classes, columns=classes)
+
+    plt.figure(figsize=(12, 7))
+    sn.heatmap(df_cm, annot=True)
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("Train Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    #figure size 
+    plt.figure(figsize=(12, 7))
+
+    sn.heatmap(df_cm, annot=True)
+    
+    cm_folder = r'output\conf_matrix_train'
+
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{cf_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
+    plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
+    plt.title("train Confusion Matrix")
+    plt.show()
+
+
+def confusion_matrix_generate_test(model_ft,data_dir,cf_name):
+    # load images 
+    print("Generation test CM")
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                         data_transforms[x])
                 for x in ['test']}
@@ -287,9 +434,13 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
     
     #figure size 
     plt.figure(figsize=(12, 7))
-
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("Test Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    
     sn.heatmap(df_cm, annot=True)
-
+    
     cm_folder = r'output\conf_matrix'
 
     # Verify if the confusionmaxtrix folder already exist or not 
@@ -309,6 +460,7 @@ def confusion_matrix_generate(model_ft,data_dir,cf_name):
     #save the output 
     plt.savefig(os.path.join(cm_path, 'output.png'))  
     print("conf metrics save")
+    plt.title("test Confusion Matrix")
     plt.show()
 
 
@@ -382,7 +534,7 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'dx4'
+    data_dir = r'test'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
@@ -427,10 +579,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet34_25epochs_dx4'
+    train_name = 'resnet18_1epochs_dx4_testCMTrainAndVal'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=25)
+                        num_epochs=1)
 
     ######################################################################
     # Save model
@@ -446,7 +598,9 @@ if __name__ == '__main__':
     
     cf_name = train_name
     
-    confusion_matrix_generate(model_ft,data_dir,cf_name)
+    confusion_matrix_generate_test(model_ft,data_dir,cf_name)
+    confusion_matrix_generate_train(model_ft,data_dir,cf_name)
+    confusion_matrix_generate_val(model_ft,data_dir,cf_name)
 
     ######################################################################
     # generate the accuracy curve
