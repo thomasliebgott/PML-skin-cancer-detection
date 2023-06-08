@@ -51,6 +51,7 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 from tqdm import tqdm
+from torch.optim import Adam
 
 cudnn.benchmark = True
 plt.ion()   # interactive mode
@@ -470,7 +471,7 @@ def confusion_matrix_generate_test(model_ft,data_dir,cf_name):
 #
 
 def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name):
-    output_folder = r'Project_PML\output\accuracy_curve'
+    output_folder = r'output\accuracy_curve'
     os.makedirs(output_folder, exist_ok=True)
 
     # create file based on 'accuracy_curve_name'
@@ -534,12 +535,12 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'test'
+    data_dir = r'dx4'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                                 shuffle=True, num_workers=4)
                 for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -560,16 +561,30 @@ if __name__ == '__main__':
     model_ft = models.resnet34(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
+    # last layer 
+    
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
     
-    model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+    #model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+    
+    
+    model_ft.fc = nn.Sequential( # to create linear sequence layer 
+    nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
+    nn.ReLU(), # introduce non linearity on the model 
+    nn.Linear(256, 7) #adding a linear layer and reduce to 256 
+    )
+    
+    
     model_ft = model_ft.to(device)
     criterion = nn.CrossEntropyLoss()
 
-    # Observe that all parameters are being optimized
+    # Observe that all parameters are being optimized SGD 
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9) #parameter lr = learnrate 
 
+    # Optimizer adams 
+    # optimizer_ft = Adam(model_ft.parameters(), lr=0.001)
+    
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1) #reducteur de facteur de LR kann anpassen sein 
                                                                                  #gamma skalirer faktor
@@ -579,10 +594,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet18_1epochs_dx4_testCMTrainAndVal'
+    train_name = 'resnet50_25epochs_dx4_LinearReluLinearLayer'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=1)
+                        num_epochs=25)
 
     ######################################################################
     # Save model
