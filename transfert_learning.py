@@ -594,10 +594,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet50_25epochs_dx4_LinearReluLinearLayer'
+    train_name = 'resnet50_15epochs_dx4_LinearReluLinearLayer'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=25)
+                        num_epochs=15)
 
     ######################################################################
     # Save model
