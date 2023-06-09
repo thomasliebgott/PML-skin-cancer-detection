@@ -79,6 +79,7 @@ def save_confusion_matrix(visualisation_name):
     #save the output 
     plt.savefig(os.path.join(cm_path, 'output.png'))
 
+# collect the true/false prediction 
 if __name__ == '__main__':
     model_ft.eval()  
     for inputs, labels in dataloaders['test']:
