@@ -318,7 +318,6 @@ def confusion_matrix_generate_val(model,data_dir,cf_name):
     plt.title("val Confusion Matrix")
     plt.show()
 
-
 def confusion_matrix_generate_train(model,data_dir,cf_name):
     # load images 
     print("Generation train CM")
@@ -389,7 +388,6 @@ def confusion_matrix_generate_train(model,data_dir,cf_name):
     print("conf metrics save")
     plt.title("train Confusion Matrix")
     plt.show()
-
 
 def confusion_matrix_generate_test(model_ft,data_dir,cf_name):
     # load images 
@@ -565,17 +563,15 @@ if __name__ == '__main__':
     
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    
+  
     #model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
-    
     
     model_ft.fc = nn.Sequential( # to create linear sequence layer 
     nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
     nn.ReLU(), # introduce non linearity on the model 
     nn.Linear(256, 7) #adding a linear layer and reduce to 256 
     )
-    
-    
+
     model_ft = model_ft.to(device)
     criterion = nn.CrossEntropyLoss()
 
