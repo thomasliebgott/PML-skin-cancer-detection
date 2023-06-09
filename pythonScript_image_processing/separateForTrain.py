@@ -1,3 +1,5 @@
+##This function separate the images after the data augmentation with test daten V1
+
 import os
 import random
 import shutil
