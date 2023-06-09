@@ -168,7 +168,6 @@ def brightened25(directory):
 
 def RemoveHair(directory):
 
-
     segmentationPath ='D:/pml/ali_branch/PML/dataverse_files/HAM10000_segmentations_lesion_tschandl/HAM10000_segmentations_lesion_tschandl/'
     file_name = os.path.basename(directory)
     segmentationImageName = os.path.splitext(file_name)
@@ -180,7 +179,7 @@ def RemoveHair(directory):
     l= 255
     u= 56
 
-    #cv2.namedWindow('image') # make a window with name 'image'
+    cv2.namedWindow('image') # make a window with name 'image'
     canny = cv2.Canny(img, l, u)
     #cv2.imshow('canny', canny)
     contours, hierarchy = cv2.findContours(canny, 
@@ -190,7 +189,9 @@ def RemoveHair(directory):
 
     if sementatedImage is None:
         sementatedImage=np.zeros((h, w), dtype = np.uint8)
-    if len(contours) > 0:
+    
+    contoursNumber=len(contours)
+    if contoursNumber > 0:
         counter=0
 
         for cont in contours:
@@ -199,10 +200,11 @@ def RemoveHair(directory):
             box = cv2.boxPoints(rect)
             box = np.int0(box)
             
-            #numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+            numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
 
-            #area= cv2.contourArea(cont)
-            #rect1 = cv2.boundingRect(cont)
+            area= cv2.contourArea(cont)
+            rect1 = cv2.boundingRect(cont)
+            ratioArea= area/ (rect1[2]*rect1[3])
             if rectangleArea==0 or (rect[1][0]==0 and rect[1][1]==0):
                 counter+=1
                 continue
@@ -216,10 +218,14 @@ def RemoveHair(directory):
                 ratioRectSide= rect[1][0]/ rect[1][1]
                 bigSide= rect[1][1]
 
-            if  ratioRectSide < 0.3 and bigSide > 33:
-                img = cv2.drawContours(img,[box],0,(255,255,255),3)
+            if  ratioArea < 0.29 and bigSide > 33:
+                #img = cv2.drawContours(img,[box],0,(255,255,255),3)
+                #cont1= cv2.convexHull(contours[counter])
                 cv2.drawContours(countourimage, contours, counter, (255,255,255), 9)
-                #cv2.waitKey(1)
+            #cv2.rectangle(img, pt1=(rect1[0],rect1[1]), pt2=(rect1[0]+rect1[2],rect1[1]+rect1[3]), color=(255,255,255), thickness=3)
+            #
+            #cv2.imshow('111', countourimage)
+            #cv2.waitKey(1)
             counter+=1
 
     noHair= filterHair(orginalImage, countourimage, sementatedImage)
@@ -321,8 +327,8 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
 if __name__ == "__main__":
     
     # Define the input and output directories
-    input_dir = r"D:/pml/ali_branch/PML/dx"
-    output_dir = r"D:/pml/ali_branch/PML/MitSegmentierungMaske"
+    input_dir = r"D:/pml/ali_branch/PML/dx_Val"
+    output_dir = r"D:/pml/ali_branch/PML/test"
     
     countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
     print('File count - AKIEDC : ', countAKIEDC)
