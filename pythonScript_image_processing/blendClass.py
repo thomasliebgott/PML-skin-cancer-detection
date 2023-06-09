@@ -166,6 +166,95 @@ def brightened25(directory):
 
     return opencv_img   
 
+def RemoveHair(directory):
+
+    segmentationPath = 'D:/Hochschule/SS/PML/Project_PML/dataverse_files/HAM10000_segmentations_lesion_tschandl/'
+    file_name = os.path.basename(directory)
+    segmentationImageName = os.path.splitext(file_name)
+    segmentationImagePath=  segmentationPath + segmentationImageName [0]+ '_segmentation.png'
+    sementatedImage = cv2.imread(segmentationImagePath, 0) #read image as grayscale
+
+    orginalImage = cv2.imread(directory, 0) #read image as grayscale
+    img= orginalImage.copy()
+    l= 255
+    u= 56
+
+    cv2.namedWindow('image') # make a window with name 'image'
+    canny = cv2.Canny(img, l, u)
+    #cv2.imshow('canny', canny)
+    contours, hierarchy = cv2.findContours(canny, 
+    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    h, w= img.shape
+    countourimage= np.zeros((h, w), dtype = np.uint8)
+
+    if sementatedImage is None:
+        sementatedImage=np.zeros((h, w), dtype = np.uint8)
+    
+    contoursNumber=len(contours)
+    if contoursNumber > 0:
+        counter=0
+
+        for cont in contours:
+            rect = cv2.minAreaRect(cont)
+            rectangleArea= rect[1][0]*rect[1][1]
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            
+            numpy_horizontal_concat = np.concatenate((img, countourimage), axis=1) # to display image side by side
+
+            area= cv2.contourArea(cont)
+            rect1 = cv2.boundingRect(cont)
+            ratioArea= area/ (rect1[2]*rect1[3])
+            if rectangleArea==0 or (rect[1][0]==0 and rect[1][1]==0):
+                counter+=1
+                continue
+            ratioRectSide= 0
+
+            bigSide= 0
+            if rect[1][0] > rect[1][1]:
+                ratioRectSide= rect[1][1]/ rect[1][0]
+                bigSide= rect[1][0]
+            else:
+                ratioRectSide= rect[1][0]/ rect[1][1]
+                bigSide= rect[1][1]
+
+            if  ratioArea < 0.29 and bigSide > 33:
+                #img = cv2.drawContours(img,[box],0,(255,255,255),3)
+                #cont1= cv2.convexHull(contours[counter])
+                cv2.drawContours(countourimage, contours, counter, (255,255,255), 9)
+            #cv2.rectangle(img, pt1=(rect1[0],rect1[1]), pt2=(rect1[0]+rect1[2],rect1[1]+rect1[3]), color=(255,255,255), thickness=3)
+            #
+            #cv2.imshow('111', countourimage)
+            #cv2.waitKey(1)
+            counter+=1
+
+    noHair= filterHair(orginalImage, countourimage, sementatedImage)
+    noHair= cv2.cvtColor(noHair,cv2.COLOR_GRAY2RGB)
+    #img= cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    #numpy_horizontal_concat = np.concatenate((img, noHair), axis=1) # to display image side by side
+    #cv2.imshow('image', numpy_horizontal_concat)
+    #cv2.waitKey(1)
+    return noHair
+
+def filterHair(orginal, hairMask, sementatedImage):
+    w, h = orginal.shape[:2]
+    noHair=orginal.copy()
+    filterSize=9
+
+    for i in range(0, w):
+        for j in range(0, h):
+            pixel=0
+            if (hairMask[i, j] == 255):
+                for k in range(i-int(filterSize/2), i+int(filterSize/2)):
+                    for l in range(j-int(filterSize/2), j+ int(filterSize/2)):
+                        if ( k >= 0 and l >= 0 and k < w and l < h and orginal[k, l] < 180):
+                             pixel=max(pixel, orginal[k, l])
+
+            if (pixel!= 0 and pixel!=255 and sementatedImage[i, j]!= 255):
+                noHair[i, j]=pixel
+            
+    return noHair
+
 def applyImageProcessing(input_dir, output_dir, num_images, functions):
     # Loop in the input directories
     for originalRoot, directorys, _ in os.walk(input_dir):
@@ -194,7 +283,7 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
             while dir_counter < num_images:
                 for file in os.listdir(output_dir_path):
                     if file.endswith('.jpg'):
-                        input_filepath = os.path.join(output_dir_path, file) #copy all the images from original dir dx to our new dx2
+                        input_filepath = os.path.join(output_dir_path, file) #copy all the images from original dir new 
                         
                         # Increment the number of time we apply function in an image
                         function_counter = 0 
@@ -234,14 +323,15 @@ def getMax(countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC):
     nn = [countAKIEDC,countBCC,countBKL,countDF,countMEL,countNV,countVASC]
     max = np.max(nn)
     return max 
-    
+
 if __name__ == "__main__":
+       
+    ### blend Val
     
-    # Define the input and output directories
-    input_dir = r"dx"
-    output_dir = r"dx2"
+    input_dir_val = r"D:/Hochschule/SS/PML/Project_PML/dx6_imageRichtigVerteilt/val"
+    output_dir_val = r"D:/Hochschule/SS/PML/Project_PML/dx7_imageRichtigVerteiltBlend/val"
     
-    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir)
+    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir_val)
     print('File count - AKIEDC : ', countAKIEDC)
     print('File count - BCC : ', countBCC)
     print('File count - BKL : ', countBKL)
@@ -256,14 +346,14 @@ if __name__ == "__main__":
     print("num_image = " + str(num_images))
     
     # Define a list of the functions
-    functions = [miror, erosion, dilatation, rotation90, rotation180, rotation270, brightened75, brightened25]
+    functions = [RemoveHair, miror, rotation90, rotation180, rotation270, brightened75, brightened25]
 
     # Loop over the input images and apply the functions to generate new images
     dir_counter = 0
     
-    applyImageProcessing(input_dir,output_dir,num_images,functions)
+    applyImageProcessing(input_dir_val,output_dir_val,num_images,functions)
     
-    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(output_dir)
+    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(output_dir_val)
     print('File count - AKIEDC : ', countAKIEDC)
     print('File count - BCC : ', countBCC)
     print('File count - BKL : ', countBKL)
@@ -273,5 +363,39 @@ if __name__ == "__main__":
     print('File count - VASC : ', countVASC)
     
     
+    ### blend Train
     
+    # Define the input and output directories
+    input_dir_train = r"D:/Hochschule/SS/PML/Project_PML/dx6_imageRichtigVerteilt/train"
+    output_dir_train = r"D:/Hochschule/SS/PML/Project_PML/dx7_imageRichtigVerteiltBlend/train"
     
+    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(input_dir_train)
+    print('File count - AKIEDC : ', countAKIEDC)
+    print('File count - BCC : ', countBCC)
+    print('File count - BKL : ', countBKL)
+    print('File count - DF : ', countDF)
+    print('File count - MEL : ', countMEL)
+    print('File count - NV : ', countNV)
+    print('File count - VASC : ', countVASC)
+
+    # Define the number of images to generate
+    num_images = getMax(countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC)
+    
+    print("num_image = " + str(num_images))
+    
+    # Define a list of the functions
+    functions = [RemoveHair, miror, rotation90, rotation180, rotation270, brightened75, brightened25]
+
+    # Loop over the input images and apply the functions to generate new images
+    dir_counter = 0
+    
+    applyImageProcessing(input_dir_train,output_dir_train,num_images,functions)
+    
+    countAKIEDC, countBCC, countBKL, countDF, countMEL, countNV, countVASC = counterFile(output_dir_train)
+    print('File count - AKIEDC : ', countAKIEDC)
+    print('File count - BCC : ', countBCC)
+    print('File count - BKL : ', countBKL)
+    print('File count - DF : ', countDF)
+    print('File count - MEL : ', countMEL)
+    print('File count - NV : ', countNV)
+    print('File count - VASC : ', countVASC)
