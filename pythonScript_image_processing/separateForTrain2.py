@@ -1,14 +1,25 @@
+<<<<<<< HEAD
+=======
+##This function separate the images after the data augmentation without test daten V2 
+
+>>>>>>> origin/develop
 import os
 import random
 import shutil
 
+<<<<<<< HEAD
 input_dir = r"dx2"
 output_dir = r"dx4"
+=======
+input_dir = r"dx2_Blend"
+output_dir = r"dx4_ohneHaareEntfernung"
+>>>>>>> origin/develop
 
 train_percentage = 80
 val_percentage = 20
 #test_percentage = 10
 
+<<<<<<< HEAD
 for directoryPath, directoryNames, fileNames in os.walk(input_dir): 
     for directoryName in directoryNames:
         
@@ -17,6 +28,16 @@ for directoryPath, directoryNames, fileNames in os.walk(input_dir):
         
         output_train = os.path.join(output_dir, "train", directoryName)
         output_val = os.path.join(output_dir, "val", directoryName)
+=======
+for currentDirectory, subDirectories, files in os.walk(input_dir): 
+    for directory_name in subDirectories:
+        
+        #setup name of different directory
+        input_subdir = os.path.join(currentDirectory, directory_name)
+        
+        output_train = os.path.join(output_dir, "train", directory_name)
+        output_val = os.path.join(output_dir, "val", directory_name)
+>>>>>>> origin/develop
         #output_test = os.path.join(output_dir, "test", directoryName)
         
         #create the directory if theyr don't exist
@@ -36,6 +57,7 @@ for directoryPath, directoryNames, fileNames in os.walk(input_dir):
         random.shuffle(imageName)
         
         # calculate the number of images for training validation and test
+<<<<<<< HEAD
         num_images = len(imageName)
 
         num_train_images = int(num_images * train_percentage / 100)
@@ -44,6 +66,16 @@ for directoryPath, directoryNames, fileNames in os.walk(input_dir):
         
         train = imageName[:num_train_images]
         val = imageName[num_train_images:num_train_images+num_val_images]
+=======
+        numImages = len(imageName)
+
+        num_train_images = int(numImages * train_percentage / 100)
+        num_val_images = int(numImages * val_percentage / 100)
+        #num_test_images = int(num_images * test_percentage / 100)
+        
+        #train = imageName[:num_train_images]
+        #val = imageName[num_train_images:num_train_images+num_val_images]
+>>>>>>> origin/develop
         #test = imageName[num_train_images+num_val_images:]
         
         # Copy the training images to the output directory

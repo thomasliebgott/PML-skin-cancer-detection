@@ -17,7 +17,6 @@ for subfolder in subfolders:
         os.mkdir(subfolder_path_img)
         print(f"folder {subfolder} created")
 
-
 with open(r'dataverse_files\ISIC2018_Task3_Test_GroundTruth.csv', 'r') as file: #red metafile
     lines = file.readlines()
     for line in lines:

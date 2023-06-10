@@ -47,8 +47,11 @@ import matplotlib.pyplot as plt
 import time
 import os
 import copy
-
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import pandas as pd
 from tqdm import tqdm
+from torch.optim import Adam
 
 cudnn.benchmark = True
 plt.ion()   # interactive mode
@@ -59,20 +62,6 @@ plt.ion()   # interactive mode
 #
 # We will use torchvision and torch.utils.data packages for loading the
 # data.
-#
-# The problem we're going to solve today is to train a model to classify
-# **ants** and **bees**. We have about 120 training images each for ants and bees.
-# There are 75 validation images for each class. Usually, this is a very
-# small dataset to generalize upon, if trained from scratch. Since we
-# are using transfer learning, we should be able to generalize reasonably
-# well.
-#
-# This dataset is a very small subset of imagenet.
-#
-# .. Note ::
-#    Download the data from
-#    `here <https://download.pytorch.org/tutorial/hymenoptera_data.zip>`_
-#    and extract it to the current directory.
 
 # Data augmentation and normalization for training
 # Just normalization for validation
@@ -109,11 +98,18 @@ def imshow(inp, title=None):
 # ``torch.optim.lr_scheduler``.
 
 
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, criterion, optimizer, scheduler, num_epochs):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict()) #copy le model 
     best_acc = 0.0
+    
+    # variables to generate the accuracy curve 
+    train_losses = []
+    train_accs = []
+    val_losses = []
+    val_accs = []
+    #error_values = []
 
     for epoch in tqdm(range(num_epochs), desc='Epochs'):
         print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -155,12 +151,18 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
-
-            if phase == 'train':
-                scheduler.step()
-
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
+            
+            if phase == 'train':
+                scheduler.step()    
+                train_losses.append(loss.item())
+                train_accs.append(epoch_acc.item())
+            else:
+                val_losses.append(loss.item())
+                val_accs.append(epoch_acc.item())
+                #error_values.append(1 - loss.item())  
+
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
 
@@ -177,14 +179,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model
+    return model,train_losses,train_accs,val_losses,val_accs
 
 
 ######################################################################
 # Visualizing the model predictions
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#
-# Generic function to display predictions for a few images
 #
 
 def visualize_model(model, num_images=6):
@@ -214,11 +214,295 @@ def visualize_model(model, num_images=6):
         model.train(mode=was_training)
 
 ######################################################################
+# save the train model 
+# ^^^^^^^^^^^^^^^^^^^^
+#
+
+def save_model(model_ft,train_name):
+    model_folder = r'output\model'
+    
+    # Verify if the model folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{train_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        model_path = os.path.join(model_folder, name_folder)
+        if not os.path.exists(model_path):
+            os.makedirs(model_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1
+    
+    #save the model in the correct file 
+    model_file_name = os.path.join(model_path, 'model.pth')
+    print("model save")
+    torch.save(model_ft.state_dict(), model_file_name)
+
+######################################################################
+# save the confusion matrix 
+# ^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+
+def confusion_matrix_generate_val(model,data_dir,cf_name):
+    # load images 
+    print("Generation val CM")
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                        data_transforms[x])
+                for x in ['val']}
+    # create image in a loaders 
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                                shuffle=True, num_workers=4)
+                for x in ['val']}
+    
+    true_labels = []
+    predicted_labels = []
+    model.eval()
+
+    for inputs, labels in dataloaders['val']:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        predicted_labels.extend(preds)
+
+        labels = labels.data.cpu().numpy()
+        true_labels.extend(labels)
+
+    classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
+    
+    predicted_labels = torch.tensor(predicted_labels)
+    true_labels = torch.tensor(true_labels)
+
+    predicted_labels = predicted_labels.cpu().numpy()
+    true_labels = true_labels.cpu().numpy()
+
+    cf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=classes, columns=classes)
+
+    plt.figure(figsize=(12, 7))
+    sn.heatmap(df_cm, annot=True)
+
+    #figure size 
+    plt.figure(figsize=(12, 7))
+
+    sn.heatmap(df_cm, annot=True)
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("val Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    
+    cm_folder = r'output\conf_matrix_val'
+
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{cf_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
+    plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
+    plt.title("val Confusion Matrix")
+    plt.show()
+
+def confusion_matrix_generate_train(model,data_dir,cf_name):
+    # load images 
+    print("Generation train CM")
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                        data_transforms[x])
+                for x in ['train']}
+    # create image in a loaders 
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                                shuffle=True, num_workers=4)
+                for x in ['train']}
+    
+    true_labels = []
+    predicted_labels = []
+    model.eval()
+
+    for inputs, labels in dataloaders['train']:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        predicted_labels.extend(preds)
+
+        labels = labels.data.cpu().numpy()
+        true_labels.extend(labels)
+
+    classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
+    
+    predicted_labels = torch.tensor(predicted_labels)
+    true_labels = torch.tensor(true_labels)
+
+    predicted_labels = predicted_labels.cpu().numpy()
+    true_labels = true_labels.cpu().numpy()
+
+    cf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=classes, columns=classes)
+
+    plt.figure(figsize=(12, 7))
+    sn.heatmap(df_cm, annot=True)
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("Train Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    #figure size 
+    plt.figure(figsize=(12, 7))
+
+    sn.heatmap(df_cm, annot=True)
+    
+    cm_folder = r'output\conf_matrix_train'
+
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{cf_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
+    plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
+    plt.title("train Confusion Matrix")
+    plt.show()
+
+def confusion_matrix_generate_test(model_ft,data_dir,cf_name):
+    # load images 
+    print("Generation test CM")
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                        data_transforms[x])
+                for x in ['test']}
+    # create image in a loaders 
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                                shuffle=True, num_workers=4)
+                for x in ['test']}
+    
+    true_labels = []
+    predicted_labels = []
+    model_ft.eval()
+    
+    # collect the true/false prediction 
+    for inputs, labels in dataloaders['test']:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        
+        outputs = model_ft(inputs)
+        _, preds = torch.max(outputs, 1)
+        predicted_labels.extend(preds)  
+
+        labels = labels.data.cpu().numpy()
+        true_labels.extend(labels) 
+        
+    classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
+
+    predicted_labels = torch.tensor(predicted_labels)
+    true_labels = torch.tensor(true_labels)
+
+    predicted_labels = predicted_labels.cpu().numpy()
+    true_labels = true_labels.cpu().numpy()
+    
+    # calculate the confusion matrix 
+    cf_matrix = confusion_matrix(true_labels, predicted_labels)
+    
+    # normalize the confusion matrix to 
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
+                         columns=[i for i in classes])
+    
+    #figure size 
+    plt.figure(figsize=(12, 7))
+    ax = sn.heatmap(df_cm, annot=True)
+    ax.set_title("Test Confusion Matrix")
+    ax.set_xlabel("Predicted labels")
+    ax.set_ylabel("True labels")
+    
+    sn.heatmap(df_cm, annot=True)
+    
+    cm_folder = r'output\conf_matrix'
+
+    # Verify if the confusionmaxtrix folder already exist or not 
+    folder_is_exists = True
+    index_folder = 0
+    while folder_is_exists:
+        name_folder = f'model_{cf_name}'
+        if index_folder > 0:
+            name_folder += f'_{index_folder}'
+        cm_path = os.path.join(cm_folder, name_folder)
+        if not os.path.exists(cm_path):
+            os.makedirs(cm_path, exist_ok=True)
+            folder_is_exists = False
+        else:
+            #add +1 if the folder already exist 
+            index_folder += 1 
+    #save the output 
+    plt.savefig(os.path.join(cm_path, 'output.png'))  
+    print("conf metrics save")
+    plt.title("test Confusion Matrix")
+    plt.show()
+
+
+######################################################################
+# generate accuracy curve  
+# ^^^^^^^^^^^^^^^^^^^^^^^
+#
+
+def accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name):
+    output_folder = r'output\accuracy_curve'
+    os.makedirs(output_folder, exist_ok=True)
+
+    # create file based on 'accuracy_curve_name'
+    filename = accuracy_curve_name.split('.')[0] + '_accuracy_curve.png'
+    filepath = os.path.join(output_folder, filename)
+    
+    # Generate x axes with epoch
+    epochs = range(1, len(train_losses) + 1)
+
+    # Trace the accuracy curve
+    plt.figure()
+    plt.plot(epochs,train_losses, label='Train Loss')
+    plt.plot(epochs,train_accs, label='Train Accuracy')
+    plt.plot(epochs,val_losses, label='Validation Loss')
+    plt.plot(epochs,val_accs, label='Validation Accuracy')
+    #plt.plot(epochs, error_values, label='Error Value')
+    plt.xlabel('Epoch')
+    plt.ylabel('Value')
+    plt.title('Accuracy Curve')
+    plt.legend()
+    plt.grid(True)
+
+    # save the curve in file 
+    plt.savefig(filepath)
+    plt.show()
+    
+######################################################################
 # Finetuning the convnet
 # ----------------------
 #
 # Load a pretrained model and reset final fully connected layer.
 #
+
 if __name__ == '__main__':
 # Data augmentation and normalization for training
 # Just normalization for validation
@@ -236,13 +520,25 @@ if __name__ == '__main__':
         transforms.ToTensor(), 
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
+    'test': transforms.Compose([
+        transforms.Resize((450, 600)),
+        transforms.CenterCrop(450),
+        transforms.ToTensor(), 
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
     }
-
-    data_dir = 'D:\\pml\\branch_Ali\\PML-master\\PML-master\\inputData3'
+    
+    ######################################################################
+    # setup the train data
+    # --------------------
+    #
+    
+    data_dir = r'dx7_imageRichtigVerteiltBlend'
+    
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                                 shuffle=True, num_workers=4)
                 for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -260,48 +556,80 @@ if __name__ == '__main__':
 
     imshow(out, title=[class_names[x] for x in classes])
 
-    model_ft = models.resnet18(pretrained=True) #nehmt das model
+    model_ft = models.resnet34(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
+    # last layer 
+    
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
+  
     model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+    
+    # model_ft.fc = nn.Sequential( # to create linear sequence layer 
+    # nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
+    # nn.ReLU(), # introduce non linearity on the model 
+    # nn.Linear(256, 7) #adding a linear layer and reduce to 256 
+    # )
 
     model_ft = model_ft.to(device)
-
     criterion = nn.CrossEntropyLoss()
 
-    # Observe that all parameters are being optimized
+    # Observe that all parameters are being optimized SGD 
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9) #parameter lr = learnrate 
 
+    # Optimizer adams 
+    # optimizer_ft = Adam(model_ft.parameters(), lr=0.001)
+    
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1) #reducteur de facteur de LR kann anpassen sein 
                                                                                  #gamma skalirer faktor
 
+    ######################################################################
+    # Train 
+    # ^^^^^
+    #
+    
+    train_name = 'resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear'
+    
+    model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
+                        num_epochs=25)
 
     ######################################################################
-    # Train and evaluate
-    # ^^^^^^^^^^^^^^^^^^
-    #
-    # It should take around 15-25 min on CPU. On GPU though, it takes less than a
-    # minute.
-    #
-
-    model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=1)
-
-    ######################################################################
-    #
-
     # Save model
-    model_folder = 'model'
-    model_number = len(os.listdir(model_folder)) + 1
-    model_path = os.path.join(model_folder, f'model_{model_number}')
-    os.makedirs(model_path)
-    model_file = os.path.join(model_path, 'model.pth')
-    torch.save(model_ft.state_dict(), model_file)
+    # ^^^^^^^^^^
+    #
+    
+    save_model(model_ft,train_name)
 
+    ######################################################################
+    # Confusion matrix
+    # ^^^^^^^^^^^^^^^^
+    #
+    
+    cf_name = train_name
+    
+    confusion_matrix_generate_test(model_ft,data_dir,cf_name)
+    confusion_matrix_generate_train(model_ft,data_dir,cf_name)
+    confusion_matrix_generate_val(model_ft,data_dir,cf_name)
+
+    ######################################################################
+    # generate the accuracy curve
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #
+    
+    accuracy_curve_name = train_name
+    
+    accuracy_curve(train_losses,train_accs,val_losses,val_accs,accuracy_curve_name)
+
+    ######################################################################
+    # visualize_model 
+    # ^^^^^^^^^^^^^^^
+    #
+    
     visualize_model(model_ft)
+    plt.ioff()
+    plt.show()
 
 
     ######################################################################
