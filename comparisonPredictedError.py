@@ -5,16 +5,16 @@ import os
 import shutil 
 from tqdm import tqdm
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
+device = torch.device('cpu') #sure graphic card 
 
-model_ft = models.resnet18(pretrained=True) #nehmt das model
+model_ft = models.resnet50(pretrained=True) #nehmt das model
 num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
 model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
-model_dir = r'output\model\model_model_resnet152_1epochs_testpath_MitSegmentierungMaskeVerteilt\model.pth'
+model_dir = r'output/model/model_resnet50_15epochs_MitSegmentierungMaskeVerteilt/model.pth'
 
-model_ft.load_state_dict(torch.load(model_dir))
+model_ft.load_state_dict(torch.load(model_dir,map_location=torch.device("cpu")))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
@@ -56,9 +56,7 @@ if __name__ == '__main__':
     model_ft.eval()  #start to put the model in evalutation mode 
     #load the dataloaders to get the test values and save the predicted value ans ture value in tab
     for inputs, labels in dataloaders['test']:
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-        
+              
         outputs = model_ft(inputs)
         _, preds = torch.max(outputs, 1)
         predicted_labels.extend(preds)  
@@ -75,7 +73,7 @@ if __name__ == '__main__':
     true_labels = true_labels.cpu().numpy()
     
     # outputdir for the images 
-    output_dir = r'comparisonPredictedError'
+    output_dir = r'comparisonPredictedError_resnet50_15epochs_MitSegmentierungMaskeVerteilt'
 
     # look at the true_class and predicted_class
     for pred in tqdm(range(len(predicted_labels)), desc='Saving Images', unit='image', leave=False):
