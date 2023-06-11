@@ -59,7 +59,7 @@ def confusionMatrix(model, testloader):
 
     cm_folder = r'output\conf_matrix_val_test'
     
-    plt.savefig(os.path.join(cm_folder,'output.png'))
+    plt.savefig(os.path.join(cm_folder,'model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear.png'))
 
 
 def imshow(inp, title=None):
@@ -107,13 +107,13 @@ if __name__ == '__main__':
                                                   shuffle=True, num_workers=4)
                    for x in ['test', 'val']}
 
-    model_ft = models.resnet34(pretrained=True)
+    model_ft = models.resnet50(pretrained=True)
     num_ftrs = model_ft.fc.in_features
 
     model_ft.fc = nn.Linear(num_ftrs, 7)
 
     model_ft.load_state_dict(
-        torch.load("D:\PML\Project_PML\output\model\model_resnet34_25epochs_dx7-imageRichtigVerteiltBlend_Linear\model.pth",
+        torch.load("D:\PML\Project_PML\output\model\model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear\model.pth",
                    map_location=device))  # Move the model to the same device
     model_ft = model_ft.to(device)
     model_ft.eval()
