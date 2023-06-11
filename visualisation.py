@@ -20,7 +20,7 @@ num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
 model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
 
-model_ft.load_state_dict(torch.load(r'output\model\model_3\model.pth'))
+model_ft.load_state_dict(torch.load(r'D:\PML\Project_PML\output\model\model_resnet18_1epochs_dx3\model.pth'))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
