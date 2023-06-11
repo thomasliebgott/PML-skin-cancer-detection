@@ -325,7 +325,7 @@ def confusion_matrix_generate_train(model,data_dir,cf_name):
                                         data_transforms[x])
                 for x in ['train']}
     # create image in a loaders 
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                                 shuffle=True, num_workers=4)
                 for x in ['train']}
     
@@ -538,7 +538,7 @@ if __name__ == '__main__':
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                                 shuffle=True, num_workers=4)
                 for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -556,7 +556,7 @@ if __name__ == '__main__':
 
     imshow(out, title=[class_names[x] for x in classes])
 
-    model_ft = models.resnet34(pretrained=True) #nehmt das model
+    model_ft = models.resnet50(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
     # last layer 
@@ -584,7 +584,7 @@ if __name__ == '__main__':
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1) #reducteur de facteur de LR kann anpassen sein 
                                                                                  #gamma skalirer faktor
-
+    
     ######################################################################
     # Train 
     # ^^^^^
