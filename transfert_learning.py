@@ -564,13 +564,13 @@ if __name__ == '__main__':
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
   
-    model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+    #model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
     
-    # model_ft.fc = nn.Sequential( # to create linear sequence layer 
-    # nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
-    # nn.ReLU(), # introduce non linearity on the model 
-    # nn.Linear(256, 7) #adding a linear layer and reduce to 256 
-    # )
+    model_ft.fc = nn.Sequential( # to create linear sequence layer 
+    nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
+    nn.ReLU(), # introduce non linearity on the model 
+    nn.Linear(256, 7) #adding a linear layer and reduce to 256 
+    )
 
     model_ft = model_ft.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -590,7 +590,7 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear'
+    train_name = 'resnet50_25epochs_dx7-imageRichtigVerteiltBlend_LinearReluLinear'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                         num_epochs=25)
