@@ -50,7 +50,6 @@ for currentDirectory, subDirectories, files in os.walk(input_folder):
             dst = os.path.join(output_train_dir, i)
             shutil.copy(src, dst)
         
-        # Déplacer les images de validation vers le dossier de sortie correspondant
         for i in val_images:
             src = os.path.join(directory_path, i)
             dst = os.path.join(output_val_dir, i)
