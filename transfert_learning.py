@@ -533,12 +533,12 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'dx7_imageRichtigVerteiltBlend'
+    data_dir = r'dx4_ohneHaareEntfernung'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
                     for x in ['train', 'val']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                                 shuffle=True, num_workers=4)
                 for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -556,7 +556,7 @@ if __name__ == '__main__':
 
     imshow(out, title=[class_names[x] for x in classes])
 
-    model_ft = models.resnet50(pretrained=True) #nehmt das model
+    model_ft = models.resnet18(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
     # last layer 
@@ -564,13 +564,13 @@ if __name__ == '__main__':
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
   
-    #model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+    model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
     
-    model_ft.fc = nn.Sequential( # to create linear sequence layer 
-    nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
-    nn.ReLU(), # introduce non linearity on the model 
-    nn.Linear(256, 7) #adding a linear layer and reduce to 256 
-    )
+    # model_ft.fc = nn.Sequential( # to create linear sequence layer 
+    # nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
+    # nn.ReLU(), # introduce non linearity on the model 
+    # nn.Linear(256, 7) #adding a linear layer and reduce to 256 
+    # )
 
     model_ft = model_ft.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -590,10 +590,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet50_25epochs_dx7-imageRichtigVerteiltBlend_LinearReluLinear'
+    train_name = 'resnet18_1epochs_dx4_ohneHaareEntfernung'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=25)
+                        num_epochs=1)
 
     ######################################################################
     # Save model
