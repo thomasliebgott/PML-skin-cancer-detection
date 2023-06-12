@@ -21,7 +21,6 @@ model_ft.load_state_dict(torch.load(r"C:\Users\Thomaslieb\Desktop\PML\output\mod
 model_ft = model_ft.to(device)
 model_ft.eval()
 
-
 data_transforms = {
     'test': transforms.Compose([
         transforms.Resize((450, 600)),
@@ -31,7 +30,7 @@ data_transforms = {
     ])
 }
 
-data_dir = r'dx4_ohneHaareEntfernung'
+data_dir = r'D:\PML\Project_PML\dx4_ohneHaareEntfernung'
 
 image_dataset = datasets.ImageFolder(os.path.join(data_dir, 'test'), data_transforms['test'])
 
@@ -39,7 +38,6 @@ dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=Tr
 
 true_labels = []
 predicted_labels = []
-
 
 if __name__ == '__main__':
     model_ft.eval()  # load the model and setup in evaluate mode
