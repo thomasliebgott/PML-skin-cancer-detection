@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load the model type
-model_ft = models.resnet18(pretrained=True)
+model_ft = models.resnet101(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 7) # chnage if it's another last layer type 
 
-fileNameModel = "model_resnet18_1epochs_dx4_ohneHaareEntfernung"
+fileNameModel = "model_resnet101_25epochs_dx4_ohneHaareEntfernung"
 
 # load the model 
-model_ft.load_state_dict(torch.load(r"D:\PML\Project_PML\output\model\model_resnet18_1epochs_dx4_ohneHaareEntfernung\model.pth"))
+model_ft.load_state_dict(torch.load(r"C:\Users\Thomaslieb\Desktop\PML\output\model\model_resnet101_25epochs_dx4\model.pth"))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
@@ -35,7 +35,7 @@ data_dir = r'dx4_ohneHaareEntfernung'
 
 image_dataset = datasets.ImageFolder(os.path.join(data_dir, 'test'), data_transforms['test'])
 
-dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=True, num_workers=4)
+dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=2, shuffle=True, num_workers=4)
 
 true_labels = []
 predicted_labels = []
@@ -135,8 +135,8 @@ if __name__ == '__main__':
     graph_axe.set_title('Result evaluations metrics for : ' + fileNameModel)
 
     for i in range(len(classes)):
-        val_f1_score = round(max(f1_scores), 2)
-        val_recall = round(max(recalls), 2)
+        val_f1_score = round(f1_scores[i], 2)
+        val_recall = round(recalls[i], 2)
         #adding the value of the score on every chart
         graph_axe.annotate(f'{val_f1_score}', (step[i], f1_scores[i]), xytext=(0, 2.5),
                     textcoords='offset points', ha='center', color='black')
