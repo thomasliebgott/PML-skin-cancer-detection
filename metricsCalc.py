@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load the model type
-model_ft = models.resnet101(pretrained=True)
+model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 7) # chnage if it's another last layer type 
 
-fileNameModel = "model_resnet101_25epochs_dx4_ohneHaareEntfernung"
+fileNameModel = "model_resnet18_25epochs_dx4_ohneHaareEntfernung"
 
 # load the model 
-model_ft.load_state_dict(torch.load(r"C:\Users\Thomaslieb\Desktop\PML\output\model\model_resnet101_25epochs_dx4\model.pth"))
+model_ft.load_state_dict(torch.load(r"D:\PML\Project_PML\output\model\model_resnet18_25epochs_dx4_ohneHaareEntfernung\model.pth"))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
