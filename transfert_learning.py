@@ -590,10 +590,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'resnet18_1epochs_dx4_ohneHaareEntfernung'
+    train_name = 'resnet18_10epochs_dx4_ohneHaareEntfernung'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=1)
+                        num_epochs=10)
 
     ######################################################################
     # Save model
