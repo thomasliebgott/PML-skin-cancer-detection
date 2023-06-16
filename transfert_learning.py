@@ -482,7 +482,7 @@ if __name__ == '__main__':
     # --------------------
     #
     
-    data_dir = r'D:\PML\Project_PML\test'
+    data_dir = r'dx7_imageRichtigVerteiltBlend'
     
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
@@ -505,7 +505,7 @@ if __name__ == '__main__':
 
     imshow(out, title=[class_names[x] for x in classes])
 
-    model_ft = models.resnet18(pretrained=True) #nehmt das model
+    model_ft = models.resnet50(pretrained=True) #nehmt das model
     num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
 
     # last layer 
@@ -539,10 +539,10 @@ if __name__ == '__main__':
     # ^^^^^
     #
     
-    train_name = 'testest'
+    train_name = 'model_resnet50_25epochs_dx7_imageRichtigVerteiltBlend'
     
     model_ft,train_losses,train_accs,val_losses,val_accs = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=1)
+                        num_epochs=25)
 
     ######################################################################
     # Save model
