@@ -21,46 +21,46 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 def confusionMatrix(model, testloader):
-    y_pred = []
-    y_true = []
+    predicted_labels = []
+    true_labels = []
 
-    # iterate over test data
     for inputs, labels in testloader['test']:
-        inputs = inputs.to(device)  # Move input to the same device as the model
-        labels = labels.to(device)  # Move labels to the same device as the model
+        inputs = inputs.to(device)  
+        labels = labels.to(device) 
 
-        output = model(inputs)  # Feed Network
+        output = model(inputs)  
         output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
-        y_pred.extend(output)  # Save Prediction
+        predicted_labels.extend(output)  
 
         labels = labels.data.cpu().numpy()
-        y_true.extend(labels)  # Save Truth
+        true_labels.extend(labels)  
 
     for inputs, labels in testloader['val']:
-        inputs = inputs.to(device)  # Move input to the same device as the model
-        labels = labels.to(device)  # Move labels to the same device as the model
+        inputs = inputs.to(device)  
+        labels = labels.to(device)  
 
-        output = model(inputs)  # Feed Network
+        output = model(inputs)  
         output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
-        y_pred.extend(output)  # Save Prediction
+        predicted_labels.extend(output)  
 
         labels = labels.data.cpu().numpy()
-        y_true.extend(labels)  # Save Truth
+        true_labels.extend(labels)  
 
-    # constant for classes
     classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
 
     # Build confusion matrix
-    cf_matrix = confusion_matrix(y_true, y_pred)
-    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
-                         columns=[i for i in classes])
-    plt.figure(figsize=(12, 7))
-    sn.heatmap(df_cm, annot=True)
-
-    cm_folder = r'output\conf_matrix_val_test'
+    cm = confusion_matrix(true_labels, predicted_labels)
+    df = pd.DataFrame(cm / np.sum(cm, axis=1)[:, None], index=classes, columns=classes) 
     
-    plt.savefig(os.path.join(cm_folder,'model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear.png'))
-
+    plt.figure(figsize=(12, 7))
+    axes = sn.heatmap(df, annot=True)
+    axes.set_title("val Confusion Matrix")
+    axes.set_xlabel("Predicted labels")
+    axes.set_ylabel("True labels")
+    
+    cm_folder_save = r'output\conf_matrix_val_test'
+    
+    plt.savefig(os.path.join(cm_folder_save,'model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear.png'))
 
 def imshow(inp, title=None):
     """Imshow for Tensor."""
@@ -78,11 +78,6 @@ def imshow(inp, title=None):
 if __name__ == '__main__':
     # Data augmentation and normalization for training
     # Just normalization for validation
-    ######################################################################
-    # Visualizing the model predictions
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    #
-    # Generic function to display predictions for a few images
 
     data_transforms = {
         'test': transforms.Compose([
