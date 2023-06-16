@@ -5,14 +5,14 @@ import os
 import shutil 
 from tqdm import tqdm
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
 
-model_ft = models.resnet18(pretrained=True) #nehmt das model
-num_ftrs = model_ft.fc.in_features #in_feature eingang auf unsere schicht 
+model_ft = models.resnet50(pretrained=True) 
+num_ftrs = model_ft.fc.in_features 
 
-model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
+model_ft.fc = nn.Linear(num_ftrs, 7) 
 
-model_dir = r'output\model\model_resnet18_10epochs_dx4\model.pth'
+model_dir = r'output\model\model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear\model.pth'
 
 model_ft.load_state_dict(torch.load(model_dir))
 model_ft = model_ft.to(device)
@@ -39,7 +39,7 @@ data_transforms = {
 ]),
 }
 
-data_dir = r'dx4'
+data_dir = r'dx7_imageRichtigVerteiltBlend'
 
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                         data_transforms[x])
@@ -82,26 +82,23 @@ if __name__ == '__main__':
         predicted_label = predicted_labels[pred]
         true_label = true_labels[pred]
         
-        # get the true_class and predicted_class
+        # get info of the true_class and predicted_class
         predicted_class = classes[predicted_label]
         true_class = classes[true_label]
         
-        # get path images which is tested
+        # get path of the images that is tested
         image_path = image_datasets['test'].imgs[pred][0]
         image_name = os.path.basename(image_path)
         
         if predicted_label != true_label:
-            # path for the false predicted 
             subfolder_dir = os.path.join(output_dir, true_class, predicted_class)
         else:
-            # path for the true predicted 
             subfolder_dir = os.path.join(output_dir, true_class, true_class)
         
         # create dir if it doesn't exist
         if not os.path.exists(subfolder_dir):
             os.makedirs(subfolder_dir, exist_ok=True)
         
-        # copy the image in the folder
         destination_dir = os.path.join(subfolder_dir, image_name)
         shutil.copy(image_path, destination_dir)
 
