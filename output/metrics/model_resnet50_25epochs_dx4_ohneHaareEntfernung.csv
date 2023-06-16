@@ -1,0 +1,10 @@
+classes,Recall,F1-score,Precision,F1_score
+AKIEDC,0.51,0.56,0.61,
+BCC,0.75,0.79,0.83,
+BKL,0.79,0.77,0.74,
+DF,0.68,0.77,0.88,
+MEL,0.63,0.6,0.58,
+NV,0.91,0.9,0.9,
+VASC,0.66,0.75,0.88,
+Accuracy,0.82,,,
+Specificity,0.82,,,
