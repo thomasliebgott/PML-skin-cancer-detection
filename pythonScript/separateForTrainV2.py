@@ -1,4 +1,4 @@
-##This function separate the images before the data augmentation V3 
+##This function separate the images before the data augmentation 
 
 import os
 import random
@@ -15,7 +15,7 @@ for currentDirectory, subDirectories, files in os.walk(input_folder):
     for directory_name in subDirectories:
         directory_path = os.path.join(currentDirectory, directory_name)
         
-        # Creation of a list with all image from subfolder 
+        # creation of a list with all image from subfolder 
         imagesName =[]
         
         # go on file
@@ -38,8 +38,8 @@ for currentDirectory, subDirectories, files in os.walk(input_folder):
         train_images = imagesName[:num_train]
         val_images = imagesName[num_train:]
         
-        # Creation of the folder for each caterogie
-        output_train_dir = os.path.join(output_train_folder, directory_name) #dire_name take the name of the orginial 
+        # creation of the folder for each caterogie
+        output_train_dir = os.path.join(output_train_folder, directory_name) #dire_name take the name of the orginal 
         output_val_dir = os.path.join(output_val_folder, directory_name)
         os.makedirs(output_train_dir, exist_ok=True)
         os.makedirs(output_val_dir, exist_ok=True)

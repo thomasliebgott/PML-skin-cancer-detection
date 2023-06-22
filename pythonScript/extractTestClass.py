@@ -1,14 +1,14 @@
 import os
 import shutil
 
-folder_path= r"dx4\\test"
+folder_path= r"dx4/test"
 
 if not os.path.exists(folder_path):
     # check if the file exist if it's not it create it 
     os.mkdir(folder_path)
     print("folder dx4 created")
 
-# Create sub folder and check before if they already exist 
+# create sub folder and check before if they already exist 
 subfolders = ["MEL", "NV", "BCC", "AKIEDC", "BKL", "DF", "VASC"]
 
 for subfolder in subfolders:
@@ -22,7 +22,7 @@ with open(r'dataverse_files\ISIC2018_Task3_Test_GroundTruth.csv', 'r') as file: 
     for line in lines:
         parts_data = line.strip().split(',') #separate data
         dx = parts_data[2]  #read dx info
-        image_name_data = parts_data[1] + '.jpg' #setupe the image name 
+        image_name_data = parts_data[1] + '.jpg' #setup the image name 
         image_path = r"dataverse_files\ISIC2018_Task3_Test_Images\ISIC2018_Task3_Test_Images/" + image_name_data
         if os.path.exists(image_path) : #look if the image exist
             if parts_data[2] == 'mel':

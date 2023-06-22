@@ -1,4 +1,4 @@
-##This function separate the images after the data augmentation without test daten V2 
+##This function separate the images after the data augmentation
 
 import os
 import random

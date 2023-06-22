@@ -48,7 +48,7 @@ def confusionMatrix(model, testloader):
 
     classes = ('AKIEDC', 'BCC', 'BKL', 'DF', 'MEL', 'NV', 'VASC')
 
-    # Build confusion matrix
+    # build confusion matrix
     cm = confusion_matrix(true_labels, predicted_labels)
     df = pd.DataFrame(cm / np.sum(cm, axis=1)[:, None], index=classes, columns=classes) 
     
@@ -94,7 +94,7 @@ if __name__ == '__main__':
         ])
     }
 
-    data_dir = 'D:\PML\Project_PML\dx7_imageRichtigVerteiltBlend'
+    data_dir = r'dx7_imageRichtigVerteiltBlend'
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                               data_transforms[x])
                       for x in ['test', 'val']}
@@ -108,8 +108,8 @@ if __name__ == '__main__':
     model_ft.fc = nn.Linear(num_ftrs, 7)
 
     model_ft.load_state_dict(
-        torch.load("D:\PML\Project_PML\output\model\model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear\model.pth",
-                   map_location=device))  # Move the model to the same device
+        torch.load(r"output\model\model_resnet50_25epochs_dx7-imageRichtigVerteiltBlend_Linear\model.pth",
+                   map_location=device))  # move the model to the same device
     model_ft = model_ft.to(device)
     model_ft.eval()
 

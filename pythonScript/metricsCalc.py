@@ -17,7 +17,7 @@ model_ft.fc = nn.Linear(num_ftrs, 7) # chnage if it's another last layer type
 fileNameModel = "model_resnet18_10epochs_dx4_ohneHaareEntfernung"
 
 # load the model 
-model_ft.load_state_dict(torch.load(r"D:\PML\Project_PML\output\model\model_resnet18_10epochs_dx4_ohneHaareEntfernung\model.pth"))
+model_ft.load_state_dict(torch.load(r"output\model\model_resnet18_10epochs_dx4_ohneHaareEntfernung\model.pth"))
 model_ft = model_ft.to(device)
 model_ft.eval()
 
@@ -75,6 +75,7 @@ if __name__ == '__main__':
     specificity = recall_score(true_labels, predicted_labels, average='weighted')
 
     #round the values 
+    
     recall = np.round(recall, 2)
     f1score = np.round(f1score, 2)
     precision = np.round(precision, 2)
@@ -89,7 +90,7 @@ if __name__ == '__main__':
                                'F1_score': ['', ''],
                                'Precision': ['', '']}
 
-    dataFrame = pd.concat([dataFrame, pd.DataFrame(evaluation_metrics_data)], ignore_index=True) #merge the data into one ligne
+    dataFrame = pd.concat([dataFrame, pd.DataFrame(evaluation_metrics_data)], ignore_index=True) #merge the data into one line
     dataFrame.replace('', np.nan, inplace=True) #replace values of '' by NaN
     num_values = ['Recall', 'F1-score', 'Precision'] #create liste with collums of the dataFrame
     dataFrame[num_values] = dataFrame[num_values].astype(float) #convert num_values into a float
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     graph_axe.set_xticks(step + chart_size / 2)
     graph_axe.set_xticklabels(classes)
 
-    # Setup graph
+    # setup the graph
     graph_axe.legend()
     graph_axe.set_xlabel('Classes')
     graph_axe.set_ylabel('Scores')

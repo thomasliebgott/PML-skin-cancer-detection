@@ -87,7 +87,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
             running_loss = 0.0
             running_corrects = 0
 
-            # Iterate over data.
+            # Iterate over data
             for inputs, labels in tqdm(dataloaders[phase], desc=f'{phase.capitalize()} iteration', leave=False):
                 inputs = inputs.to(device) #transfer the device to the gpu 
                 labels = labels.to(device)
@@ -274,7 +274,7 @@ def confusion_matrix_generate_val(model,data_dir,cf_name):
             folder_is_existing = False
         else:
             index += 1 
-    #save the output 
+     
     plt.savefig(os.path.join(cm_path, 'output.png'))  
     print("conf metrics save")
     plt.title("val Confusion Matrix")
@@ -497,10 +497,10 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") #sure graphic card 
     print(device)
 
-    # Get a batch of training data
+    # get a batch of training data
     inputs, classes = next(iter(dataloaders['train']))
 
-    # Make a grid from batch
+    # make a grid from batch
     out = torchvision.utils.make_grid(inputs)
 
     imshow(out, title=[class_names[x] for x in classes])

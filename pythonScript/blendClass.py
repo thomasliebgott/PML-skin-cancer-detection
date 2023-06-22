@@ -146,7 +146,7 @@ def brightened25(directory):
 
 def RemoveHair(directory):
 
-    segmentationPath = 'D:/Hochschule/SS/PML/Project_PML/dataverse_files/HAM10000_segmentations_lesion_tschandl/'
+    segmentationPath = r'dataverse_files/HAM10000_segmentations_lesion_tschandl'
     file_name = os.path.basename(directory)
     segmentationImageName = os.path.splitext(file_name)
     segmentationImagePath=  segmentationPath + segmentationImageName [0]+ '_segmentation.png'
@@ -241,18 +241,18 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
             input_dir_path = os.path.join(originalRoot, directory)
             output_dir_path = os.path.join(output_dir, directory)
 
-            # Create if it doesnt exist
+            # create if it doesnt exist
             if not os.path.exists(output_dir_path):
                 os.makedirs(output_dir_path)
 
-            # coppy all the image form inpu to output directory
+            # copy all the image form inpu to output directory
             for file in os.listdir(input_dir_path):
                 if file.endswith('.jpg'):
                     input_filepath = os.path.join(input_dir_path, file)
                     output_filepath = os.path.join(output_dir_path, file)
                     shutil.copy(input_filepath, output_filepath)
 
-            # Increment the number of images in the directory count (setup with original number in dx)
+            # increment the number of images in the directory count (setup with original number in dx)
             dir_counter = len(os.listdir(output_dir_path))
 
             # calculate the number of images that we want pro directory
@@ -263,7 +263,7 @@ def applyImageProcessing(input_dir, output_dir, num_images, functions):
                     if file.endswith('.jpg'):
                         input_filepath = os.path.join(output_dir_path, file) #copy all the images from original dir to the new one
                         
-                        # coutner of number of time function is apply
+                        # counter of number of time function is apply
                         function_counter = 0 
                         
                         image_count = 0    
@@ -307,6 +307,7 @@ if __name__ == "__main__":
     #########################  
     # Blend validation images 
     #
+    
     input_dir_val = r"dx6_imageRichtigVerteilt/val"
     output_dir_val = r"dx7_imageRichtigVerteiltBlend/val"
     

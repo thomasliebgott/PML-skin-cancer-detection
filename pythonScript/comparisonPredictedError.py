@@ -54,7 +54,7 @@ predicted_labels = []
 
 if __name__ == '__main__':
     model_ft.eval()  #start to put the model in evalutation mode 
-    #load the dataloaders to get the test values and save the predicted value ans ture value in tab
+    #load the dataloaders to get the test values and save the predicted value and true value in the tab
     for inputs, labels in dataloaders['test']:
         inputs = inputs.to(device)
         labels = labels.to(device)
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     predicted_labels = predicted_labels.cpu().numpy()
     true_labels = true_labels.cpu().numpy()
     
-    # outputdir for the images 
+    # output dir for the images 
     output_dir = r'comparisonPredictedError'
 
     # look at the true_class and predicted_class
