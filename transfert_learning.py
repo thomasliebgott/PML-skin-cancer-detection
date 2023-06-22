@@ -514,12 +514,6 @@ if __name__ == '__main__':
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
   
     model_ft.fc = nn.Linear(num_ftrs, 7) #type de übetragungfuncktion #######################anderung 
-    
-    # model_ft.fc = nn.Sequential( # to create linear sequence layer 
-    # nn.Linear(num_ftrs, 256), #adding a linear layer and reduce to 256 
-    # nn.ReLU(), # introduce non linearity on the model 
-    # nn.Linear(256, 7) #adding a linear layer and reduce to 256 
-    # )
 
     model_ft = model_ft.to(device)
     criterion = nn.CrossEntropyLoss()
